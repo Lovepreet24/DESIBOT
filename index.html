@@ -1,815 +1,1379 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<meta name="theme-color" content="#090d18">
-<title>NX Coin</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <meta name="theme-color" content="#080d1a">
 
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
-<script src="https://sad.adsgram.ai/js/sad.min.js"></script>
+  <title>NX USDT</title>
 
-<style>
-:root{
-  --bg:#090d18;
-  --panel:#131b2c;
-  --panel2:#19243a;
-  --gold:#ffd54a;
-  --gold2:#ffad25;
-  --blue:#477bff;
-  --text:#f5f7ff;
-  --muted:#8d99b0;
-  --green:#39d6a0;
-  --border:rgba(255,255,255,.08);
-}
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
-body{padding-bottom:100px;background:radial-gradient(ellipse at 50% 0%,#1a2542 0%,transparent 43%),var(--bg)}
-button,input{font:inherit}
-button{cursor:pointer}
-.app{width:100%;max-width:520px;margin:auto;padding:19px 16px 30px}
-.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:23px}
-.brand{display:flex;align-items:center;gap:11px}
-.logo{width:45px;height:45px;border-radius:15px;background:linear-gradient(135deg,var(--gold),var(--gold2));display:grid;place-items:center;color:#171a22;font-size:24px;font-weight:1000;box-shadow:0 6px 25px #ffca4520}
-.brand-name{font-size:21px;font-weight:950;letter-spacing:-.5px}
-.brand-sub{font-size:10px;color:var(--muted);margin-top:4px;letter-spacing:1px}
-.online{display:flex;align-items:center;gap:6px;padding:8px 10px;border-radius:30px;background:#143025;border:1px solid #214735;color:var(--green);font-size:10px;font-weight:800}
-.online-dot{width:7px;height:7px;border-radius:50%;background:var(--green)}
-.hero{padding:23px 20px;border-radius:25px;border:1px solid #ffd54a30;background:radial-gradient(circle at 100% 0%,#ffd54a18,transparent 42%),linear-gradient(145deg,#1a2540,#101625);box-shadow:0 15px 40px #0003}
-.hero-label{font-size:11px;font-weight:750;color:#c5ccdb;letter-spacing:.6px}
-.balance{font-size:clamp(32px,9vw,43px);font-weight:950;letter-spacing:-1.3px;margin-top:13px;overflow-wrap:anywhere}
-.balance small{font-size:16px;color:var(--gold);letter-spacing:0}
-.network{font-size:11px;color:var(--muted);margin-top:7px}
-.hero-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:22px}
-.btn{min-height:46px;border:0;border-radius:13px;padding:12px;font-size:12px;font-weight:850}
-.btn-gold{background:linear-gradient(110deg,var(--gold),var(--gold2));color:#181a20}
-.btn-blue{background:linear-gradient(110deg,#7557f5,#397ff6);color:white}
-.btn-dark{background:#202b42;border:1px solid #303b52;color:white}
-.btn:disabled{opacity:.5}
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin:14px 0 26px}
-.stat{min-width:0;padding:14px 6px;text-align:center;border:1px solid var(--border);border-radius:16px;background:#131b2c}
-.stat-icon{font-size:19px}
-.stat-value{font-size:18px;font-weight:900;margin-top:8px;overflow-wrap:anywhere}
-.stat-label{font-size:9px;color:var(--muted);margin-top:5px}
-.page{display:none}
-.page.active{display:block}
-.heading{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 2px 14px}
-.heading h2{font-size:20px;font-weight:900;margin:0}
-.heading span{font-size:10px;color:var(--muted)}
-.card{padding:16px;border:1px solid var(--border);border-radius:19px;background:linear-gradient(145deg,#151e31,#101625);margin-bottom:11px}
-.task{display:flex;align-items:center;gap:11px}
-.task-icon{width:46px;height:46px;flex-shrink:0;display:grid;place-items:center;border-radius:14px;background:#222c42;font-size:22px}
-.task-info{flex:1;min-width:0}
-.task-title{font-size:12px;font-weight:850;line-height:1.45}
-.task-reward{font-size:11px;color:var(--green);font-weight:800;margin-top:5px}
-.task-desc{font-size:10px;color:var(--muted);margin-top:4px;line-height:1.45}
-.task-button{min-width:85px;border:0;border-radius:11px;padding:11px 9px;background:linear-gradient(110deg,#7355f5,#397ff6);color:white;font-size:10px;font-weight:850}
-.task-button.done{background:#143025;color:var(--green)}
-.task-button:disabled{opacity:.7}
-.section-intro{font-size:11px;color:var(--muted);line-height:1.65;margin:-4px 2px 15px}
-.progress{height:7px;border-radius:10px;background:#28334a;overflow:hidden;margin-top:10px}
-.progress-bar{height:100%;width:0;background:linear-gradient(90deg,var(--gold),var(--gold2));transition:width .25s}
-.progress-label{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:12px}
-.referral-hero{padding:20px;border-radius:21px;border:1px solid #ffd54a28;background:radial-gradient(circle at 100% 0%,#ffd54a16,transparent 50%),#151e31;margin-bottom:13px}
-.referral-hero h3{margin:0;font-size:14px}
-.referral-reward{font-size:30px;font-weight:950;color:var(--gold);margin:10px 0}
-.muted{font-size:11px;line-height:1.65;color:var(--muted)}
-.referral-link{padding:13px;background:#0b1120;border:1px solid #2a354d;border-radius:12px;margin:14px 0;overflow-wrap:anywhere;font-size:11px;line-height:1.6;color:#dce3f1;min-height:45px}
-.two-buttons{display:grid;grid-template-columns:1fr 1fr;gap:9px}
-.field-label{display:block;margin:17px 0 8px;color:#c3cbd9;font-size:11px;font-weight:800}
-.input{width:100%;height:48px;padding:0 13px;background:#0b1120;color:white;border:1px solid #2a354d;border-radius:12px;outline:none;font-size:12px}
-.input:focus{border-color:var(--gold)}
-.requirements{padding:13px;border-radius:13px;background:#0b1220;margin-top:15px}
-.req-row{display:flex;justify-content:space-between;gap:10px;margin:8px 0;font-size:11px;color:#c6cfdf}
-.req-row strong{color:var(--gold)}
-.notice{font-size:10px;line-height:1.6;color:var(--muted);margin-top:13px}
-.history-row{display:flex;justify-content:space-between;gap:10px;padding:13px 0;border-bottom:1px solid var(--border);font-size:11px}
-.history-row:last-child{border-bottom:0}
-.history-status{color:var(--gold);font-weight:800}
-.empty{text-align:center;padding:24px 10px;color:var(--muted);font-size:11px}
-.bottom-nav{position:fixed;z-index:50;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:520px;display:grid;grid-template-columns:repeat(4,1fr);padding:9px 7px calc(9px + env(safe-area-inset-bottom));background:#0b101df5;backdrop-filter:blur(18px);border-top:1px solid var(--border)}
-.nav-btn{border:0;border-radius:13px;padding:8px 2px;background:transparent;color:#7c89a2;font-size:9px;font-weight:850}
-.nav-icon{display:block;font-size:20px;margin-bottom:5px}
-.nav-btn.active{background:#242338;color:var(--gold)}
-.toast{position:fixed;z-index:100;left:50%;bottom:92px;transform:translate(-50%,15px);width:calc(100% - 34px);max-width:450px;padding:13px 15px;border:1px solid #3a4862;border-radius:13px;background:#202b40;color:white;font-size:11px;line-height:1.5;opacity:0;pointer-events:none;transition:.2s}
-.toast.show{opacity:1;transform:translate(-50%,0)}
-@media(max-width:360px){
-  .app{padding-left:12px;padding-right:12px}
-  .task{gap:7px}
-  .task-icon{width:39px;height:39px}
-  .task-button{min-width:74px;padding:10px 6px}
-  .task-title{font-size:11px}
-}
-</style>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+  <style>
+    :root {
+      --bg: #080d1a;
+      --panel: #111a2d;
+      --panel2: #162139;
+      --gold: #f5c451;
+      --gold2: #ffe29a;
+      --text: #ffffff;
+      --muted: #98a5bd;
+      --green: #3ddc97;
+      --border: rgba(255,255,255,.08);
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      margin: 0;
+      background: radial-gradient(ellipse at top, rgba(245,196,81,.09), transparent 55%), var(--bg);
+      color: var(--text);
+      font-family: Arial, Helvetica, sans-serif;
+      padding-bottom: 95px;
+    }
+
+    button, input {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: .55;
+    }
+
+    .app {
+      max-width: 520px;
+      margin: auto;
+      padding: 18px 15px;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+    }
+
+    .logo {
+      height: 45px;
+      width: 45px;
+      display: grid;
+      place-items: center;
+      border-radius: 15px;
+      background: linear-gradient(135deg, #ffe39b, #d49b24);
+      color: #111827;
+      font-weight: 900;
+      font-size: 19px;
+    }
+
+    .brand h1 {
+      font-size: 21px;
+      margin: 0;
+    }
+
+    .brand p {
+      font-size: 11px;
+      color: var(--muted);
+      margin: 5px 0 0;
+    }
+
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      color: var(--green);
+      font-size: 11px;
+      background: rgba(61,220,151,.08);
+      padding: 8px 10px;
+      border-radius: 20px;
+    }
+
+    .dot {
+      height: 6px;
+      width: 6px;
+      background: var(--green);
+      border-radius: 50%;
+    }
+
+    .welcome {
+      font-size: 14px;
+      color: var(--muted);
+      margin: 10px 0 15px;
+    }
+
+    .balance-card {
+      background: linear-gradient(135deg, rgba(245,196,81,.17), rgba(17,26,45,.98) 58%);
+      border: 1px solid rgba(245,196,81,.3);
+      border-radius: 23px;
+      padding: 22px 20px;
+      margin-bottom: 16px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .balance-label {
+      color: #d5dced;
+      font-size: 13px;
+    }
+
+    .balance {
+      font-size: 37px;
+      font-weight: 900;
+      margin: 12px 0 7px;
+      overflow-wrap: anywhere;
+    }
+
+    .balance span {
+      color: var(--gold);
+      font-size: 18px;
+    }
+
+    .chain-label {
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .balance-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 21px;
+    }
+
+    .btn {
+      border: 0;
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-weight: 800;
+      font-size: 13px;
+      flex: 1;
+    }
+
+    .btn-gold {
+      background: linear-gradient(135deg, var(--gold2), #e8b536);
+      color: #171717;
+    }
+
+    .btn-dark {
+      color: var(--gold);
+      background: rgba(245,196,81,.08);
+      border: 1px solid rgba(245,196,81,.25);
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 24px 0 12px;
+      gap: 10px;
+    }
+
+    .section-title h2 {
+      font-size: 18px;
+      margin: 0;
+    }
+
+    .section-title span {
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 9px;
+    }
+
+    .stat {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 15px;
+      padding: 14px 9px;
+      min-width: 0;
+    }
+
+    .stat-icon {
+      font-size: 19px;
+      margin-bottom: 10px;
+    }
+
+    .stat-value {
+      font-weight: 900;
+      font-size: 18px;
+      overflow-wrap: anywhere;
+    }
+
+    .stat-label {
+      font-size: 10px;
+      color: var(--muted);
+      margin-top: 5px;
+    }
+
+    .reward-banner {
+      background: linear-gradient(110deg, #25213a, #182039);
+      border: 1px solid rgba(245,196,81,.15);
+      border-radius: 17px;
+      padding: 15px;
+      margin-top: 17px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .reward-banner h3 {
+      font-size: 14px;
+      margin: 0 0 6px;
+    }
+
+    .reward-banner p {
+      font-size: 11px;
+      color: var(--muted);
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    .reward-amount {
+      font-size: 22px;
+      font-weight: 900;
+      color: var(--gold);
+      white-space: nowrap;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      padding: 5px;
+      background: #0e1526;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      margin: 17px 0;
+    }
+
+    .tab {
+      flex: 1;
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      padding: 12px 5px;
+      font-weight: 800;
+      font-size: 12px;
+      border-radius: 10px;
+    }
+
+    .tab.active {
+      background: linear-gradient(135deg, #ffe39b, #e6b237);
+      color: #151515;
+    }
+
+    .task-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .task {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+    }
+
+    .task-icon {
+      flex-shrink: 0;
+      height: 43px;
+      width: 43px;
+      border-radius: 13px;
+      display: grid;
+      place-items: center;
+      background: var(--panel2);
+      font-size: 21px;
+    }
+
+    .task-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .task-info h3 {
+      font-size: 13px;
+      margin: 0 0 6px;
+    }
+
+    .task-info p {
+      font-size: 11px;
+      color: var(--muted);
+      margin: 0;
+      line-height: 1.45;
+    }
+
+    .task-reward {
+      font-size: 12px;
+      font-weight: 900;
+      color: var(--gold);
+      margin-bottom: 8px;
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .task-btn {
+      border: 0;
+      border-radius: 8px;
+      padding: 9px 10px;
+      font-size: 10px;
+      font-weight: 900;
+      min-width: 83px;
+    }
+
+    .task-btn.start {
+      background: var(--gold);
+      color: #151515;
+    }
+
+    .task-btn.pending {
+      background: #5a4925;
+      color: #ffe39b;
+    }
+
+    .task-btn.claimed {
+      background: rgba(61,220,151,.13);
+      color: var(--green);
+    }
+
+    .task-btn.soon {
+      background: #242d40;
+      color: #aab5c8;
+    }
+
+    .small-note {
+      font-size: 11px;
+      line-height: 1.6;
+      color: var(--muted);
+      margin: 12px 2px;
+    }
+
+    .panel {
+      display: none;
+    }
+
+    .panel.active {
+      display: block;
+    }
+
+    .ref-card, .withdraw-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 19px;
+      padding: 18px;
+      margin-top: 15px;
+    }
+
+    .ref-card h3, .withdraw-card h3 {
+      margin: 0 0 8px;
+      font-size: 16px;
+    }
+
+    .ref-card p, .withdraw-card p {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    .ref-url {
+      word-break: break-all;
+      background: #0a1120;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      font-size: 11px;
+      line-height: 1.5;
+      margin: 14px 0;
+    }
+
+    .input {
+      width: 100%;
+      background: #0a1120;
+      color: white;
+      border: 1px solid #293650;
+      padding: 13px;
+      border-radius: 11px;
+      outline: none;
+      margin: 8px 0;
+      font-size: 13px;
+    }
+
+    .input:focus {
+      border-color: var(--gold);
+    }
+
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 20;
+      display: flex;
+      justify-content: center;
+      background: rgba(8,13,26,.97);
+      backdrop-filter: blur(16px);
+      border-top: 1px solid var(--border);
+      padding: 10px 6px calc(10px + env(safe-area-inset-bottom));
+    }
+
+    .nav-inner {
+      width: 100%;
+      max-width: 520px;
+      display: flex;
+      justify-content: space-around;
+    }
+
+    .nav-btn {
+      flex: 1;
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 700;
+      padding: 6px 2px;
+    }
+
+    .nav-icon {
+      display: block;
+      font-size: 20px;
+      margin-bottom: 5px;
+    }
+
+    .nav-btn.active {
+      color: var(--gold);
+    }
+
+    .toast {
+      position: fixed;
+      left: 15px;
+      right: 15px;
+      bottom: 90px;
+      z-index: 50;
+      background: #202b41;
+      color: white;
+      padding: 14px;
+      border-radius: 12px;
+      font-size: 12px;
+      text-align: center;
+      display: none;
+    }
+
+    .toast.show {
+      display: block;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+  </style>
 </head>
 
 <body>
-<div class="app">
-
-<header class="topbar">
-  <div class="brand">
-    <div class="logo">N</div>
-    <div>
-      <div class="brand-name">NX COIN</div>
-      <div class="brand-sub">EARN · INVITE · REWARDS</div>
-    </div>
-  </div>
-  <div class="online"><span class="online-dot"></span><span id="connection">SETUP</span></div>
-</header>
-
-<!-- HOME -->
-<main id="homePage" class="page active">
-  <section class="hero">
-    <div class="hero-label">YOUR TOTAL BALANCE</div>
-    <div class="balance"><span id="balance">—</span> <small>USDT</small></div>
-    <div class="network">BEP-20 · BNB Smart Chain</div>
-    <div class="hero-actions">
-      <button class="btn btn-gold" onclick="openPage('withdraw')">↑ Withdraw</button>
-      <button class="btn btn-dark" onclick="openPage('tasks')">⚡ Earn More</button>
-    </div>
-  </section>
-
-  <section class="stats">
-    <div class="stat"><div class="stat-icon">👥</div><div class="stat-value" id="referrals">—</div><div class="stat-label">REFERRALS</div></div>
-    <div class="stat"><div class="stat-icon">🎬</div><div class="stat-value" id="adsCount">0/5</div><div class="stat-label">ADS DONE</div></div>
-    <div class="stat"><div class="stat-icon">⚡</div><div class="stat-value" id="socialCount">0/4</div><div class="stat-label">TASKS DONE</div></div>
-  </section>
-
-  <div class="heading"><h2>Quick Tasks</h2><span>Earn rewards</span></div>
-
-  <div class="card task">
-    <div class="task-icon">🎬</div>
-    <div class="task-info"><div class="task-title">Watch AdsGram Ads</div><div class="task-reward">5 ads available</div><div class="task-desc">Complete all 5 to unlock withdrawals.</div></div>
-    <button class="task-button" onclick="openPage('tasks')">Start</button>
-  </div>
-
-  <div class="card task">
-    <div class="task-icon">👥</div>
-    <div class="task-info"><div class="task-title">Invite Friends</div><div class="task-reward">+5 USDT / valid referral</div><div class="task-desc">Share your personal invite link.</div></div>
-    <button class="task-button" onclick="openPage('refer')">Invite</button>
-  </div>
-
-  <div class="card">
-    <div class="heading" style="margin-bottom:4px"><h2 style="font-size:14px">Withdrawal Progress</h2></div>
-    <div class="progress-label"><span>Ads completed</span><span id="homeAdsProgress">0/5</span></div>
-    <div class="progress"><div id="homeAdsBar" class="progress-bar"></div></div>
-    <div class="progress-label"><span>Social tasks completed</span><span id="homeSocialProgress">0/4</span></div>
-    <div class="progress"><div id="homeSocialBar" class="progress-bar"></div></div>
-  </div>
-</main>
-
-<!-- TASKS -->
-<main id="tasksPage" class="page">
-  <div class="heading"><h2>Earn Rewards</h2><span id="totalProgress">0/9 complete</span></div>
-  <p class="section-intro">Complete five AdsGram ads and four social tasks to meet the withdrawal requirements.</p>
-
-  <div class="card">
-    <div class="heading" style="margin-bottom:0"><h2 style="font-size:15px">🎬 Watch Ads</h2><span>5 required</span></div>
-    <div class="progress-label"><span>Ads progress</span><span id="adsProgress">0/5</span></div>
-    <div class="progress"><div id="adsBar" class="progress-bar"></div></div>
-  </div>
-  <div id="adsList"></div>
-
-  <div class="heading" style="margin-top:25px"><h2>Social Tasks</h2><span>4 required</span></div>
-  <div id="socialList"></div>
-  <p class="section-intro">Social tasks and rewards will be configured and verified by the backend.</p>
-</main>
-
-<!-- REFERRALS -->
-<main id="referPage" class="page">
-  <div class="heading"><h2>Invite Friends</h2><span>Refer & earn</span></div>
-
-  <div class="referral-hero">
-    <h3>YOUR REFERRAL REWARD</h3>
-    <div class="referral-reward">+5 USDT</div>
-    <div class="muted">Earn 5 USDT for each valid, verified referral.</div>
-  </div>
-
-  <div class="card">
-    <div class="heading"><h2 style="font-size:15px">Referral Statistics</h2></div>
-    <div class="stats" style="margin:0">
-      <div class="stat"><div class="stat-icon">👥</div><div class="stat-value" id="refPageCount">—</div><div class="stat-label">INVITED</div></div>
-      <div class="stat"><div class="stat-icon">💰</div><div class="stat-value" id="refEarnings">—</div><div class="stat-label">USDT EARNED</div></div>
-      <div class="stat"><div class="stat-icon">🎁</div><div class="stat-value">10</div><div class="stat-label">JOIN BONUS</div></div>
-    </div>
-
-    <label class="field-label">YOUR PERSONAL REFERRAL LINK</label>
-    <div id="referralLink" class="referral-link">Available after bot setup.</div>
-
-    <div class="two-buttons">
-      <button class="btn btn-gold" onclick="shareReferral()">↗ Share Link</button>
-      <button class="btn btn-dark" onclick="copyReferral()">▣ Copy Link</button>
-    </div>
-  </div>
-
-  <div class="heading" style="margin-top:23px"><h2>Referral History</h2></div>
-  <div class="card"><div id="refHistory" class="empty">No referral history loaded.</div></div>
-</main>
-
-<!-- WITHDRAW -->
-<main id="withdrawPage" class="page">
-  <div class="heading"><h2>Withdraw USDT</h2><span>BEP-20</span></div>
-
-  <div class="card">
-    <div class="muted">AVAILABLE BALANCE</div>
-    <div class="balance" style="font-size:32px"><span id="withdrawBalance">—</span> <small>USDT</small></div>
-
-    <div class="requirements">
-      <div class="req-row"><span>Minimum withdrawal</span><strong>5 USDT</strong></div>
-      <div class="req-row"><span>Ads completed</span><strong id="withdrawAds">0/5</strong></div>
-      <div class="req-row"><span>Social tasks completed</span><strong id="withdrawSocial">0/4</strong></div>
-    </div>
-
-    <label class="field-label" for="wallet">BSC wallet address</label>
-    <input class="input" id="wallet" type="text" placeholder="0x..." autocomplete="off" spellcheck="false">
-
-    <label class="field-label" for="amount">Withdrawal amount (USDT)</label>
-    <input class="input" id="amount" type="number" min="5" step="0.01" placeholder="Minimum 5 USDT">
-
-    <button id="withdrawBtn" class="btn btn-gold" style="width:100%;margin-top:17px" onclick="withdraw()">Request Withdrawal</button>
-
-    <div class="notice">Real withdrawals require backend verification, a funded payout wallet and sufficient BNB for network gas.</div>
-  </div>
-
-  <div class="heading" style="margin-top:25px"><h2>Withdrawal History</h2></div>
-  <div class="card"><div id="payoutHistory" class="empty">No withdrawals yet.</div></div>
-</main>
-
-</div>
-
-<nav class="bottom-nav">
-  <button class="nav-btn active" data-page="home" onclick="openPage('home')"><span class="nav-icon">⌂</span>HOME</button>
-  <button class="nav-btn" data-page="tasks" onclick="openPage('tasks')"><span class="nav-icon">⚡</span>EARN</button>
-  <button class="nav-btn" data-page="refer" onclick="openPage('refer')"><span class="nav-icon">♧</span>REFER</button>
-  <button class="nav-btn" data-page="withdraw" onclick="openPage('withdraw')"><span class="nav-icon">◇</span>WITHDRAW</button>
-</nav>
-
-<div id="toast" class="toast"></div>
-
-<script>
-"use strict";
-
-/* ========================================================
-   NEW BOT CONFIGURATION
-======================================================== */
-
-const CONFIG = {
-  APP_NAME: "NX Coin",
-
-  // Replace after creating the NEW Railway backend.
-  API_BASE: "PASTE_NEW_RAILWAY_BACKEND_URL_HERE",
-
-  // Replace after creating the NEW Telegram bot.
-  BOT_USERNAME: "YOUR_NEW_BOT_USERNAME",
-
-  ADSGRAM_BLOCK_ID: "52783",
-
-  JOINING_BONUS_USDT: 10,
-  REFERRAL_REWARD_USDT: 5,
-  MIN_WITHDRAWAL_USDT: 5,
-
-  REQUIRED_ADS: 5,
-  REQUIRED_SOCIAL_TASKS: 4
-};
-
-const tg = window.Telegram?.WebApp;
-
-if (tg) {
-  tg.ready();
-  tg.expand();
-  try {
-    tg.setHeaderColor("#090d18");
-    tg.setBackgroundColor("#090d18");
-  } catch {}
-}
-
-let appState = {
-  balance: null,
-  referrals: null,
-  referralReward: null,
-  tasks: [],
-  payouts: [],
-  referralHistory: [],
-  user: null
-};
-
-let adsgramController = null;
-let adsgramBusy = false;
-
-const ADS_TASKS = Array.from({length:5}, (_,i) => ({
-  id:101+i,
-  title:`AdsGram Reward Ad ${i+1}`
-}));
-
-const SOCIAL_TASKS = [
-  {id:1,title:"Join Official Telegram Channel",icon:"📢"},
-  {id:2,title:"Join Community Channel",icon:"👥"},
-  {id:3,title:"Visit Project Website",icon:"🌐"},
-  {id:4,title:"Follow Project Updates",icon:"⭐"}
-];
-
-/* ========================================================
-   HELPERS
-======================================================== */
-
-function showToast(message) {
-  const el = document.getElementById("toast");
-  el.textContent = message;
-  el.classList.add("show");
-  clearTimeout(showToast.timer);
-  showToast.timer = setTimeout(() => el.classList.remove("show"), 3300);
-}
-
-function money(value) {
-  const n = Number(value);
-  if (!Number.isFinite(n)) return "0.00";
-  return n.toLocaleString("en-US", {
-    minimumFractionDigits:2,
-    maximumFractionDigits:6
-  });
-}
-
-function escapeHtml(value) {
-  return String(value ?? "").replace(/[&<>"']/g, c => ({
-    "&":"&amp;",
-    "<":"&lt;",
-    ">":"&gt;",
-    '"':"&quot;",
-    "'":"&#39;"
-  })[c]);
-}
-
-function backendReady() {
-  return CONFIG.API_BASE.startsWith("https://") &&
-    !CONFIG.API_BASE.includes("PASTE_NEW_RAILWAY");
-}
-
-async function api(path, method="GET", body=null) {
-  if (!backendReady()) {
-    throw new Error("New backend is not connected yet.");
-  }
-
-  if (!tg?.initData) {
-    throw new Error("Please open NX Coin from Telegram.");
-  }
-
-  const response = await fetch(CONFIG.API_BASE + path, {
-    method,
-    headers:{
-      "Content-Type":"application/json",
-      "X-Telegram-Init-Data":tg.initData
-    },
-    body:body === null ? undefined : JSON.stringify(body)
-  });
-
-  let data;
-  try {
-    data = await response.json();
-  } catch {
-    throw new Error("Invalid backend response.");
-  }
-
-  if (!response.ok || data?.ok === false) {
-    throw new Error(data?.error || data?.message || "Request failed.");
-  }
-
-  return data;
-}
-
-function getTask(id) {
-  return appState.tasks.find(t => Number(t.id) === Number(id));
-}
-
-function taskClaimed(id) {
-  return Boolean(getTask(id)?.claimed);
-}
-
-function adsDone() {
-  return ADS_TASKS.filter(t => taskClaimed(t.id)).length;
-}
-
-function socialDone() {
-  return SOCIAL_TASKS.filter(t => taskClaimed(t.id)).length;
-}
-
-/* ========================================================
-   NAVIGATION
-======================================================== */
-
-function openPage(name) {
-  const pageIds = {
-    home:"homePage",
-    tasks:"tasksPage",
-    refer:"referPage",
-    withdraw:"withdrawPage"
-  };
-
-  Object.values(pageIds).forEach(id => {
-    document.getElementById(id).classList.remove("active");
-  });
-
-  document.getElementById(pageIds[name]).classList.add("active");
-
-  document.querySelectorAll(".nav-btn").forEach(btn => {
-    btn.classList.toggle("active", btn.dataset.page === name);
-  });
-
-  window.scrollTo({top:0,behavior:"smooth"});
-
-  if (name === "withdraw") renderWithdrawProgress();
-}
-
-/* ========================================================
-   RENDER BALANCE
-======================================================== */
-
-function renderBalance() {
-  const balance = appState.balance === null ? "—" : money(appState.balance);
-
-  document.getElementById("balance").textContent = balance;
-  document.getElementById("withdrawBalance").textContent = balance;
-
-  const refs = appState.referrals === null ? "—" : appState.referrals;
-  document.getElementById("referrals").textContent = refs;
-  document.getElementById("refPageCount").textContent = refs;
-
-  document.getElementById("refEarnings").textContent =
-    appState.referralReward === null ? "—" : money(appState.referralReward);
-}
-
-/* ========================================================
-   RENDER TASKS
-======================================================== */
-
-function renderAds() {
-  document.getElementById("adsList").innerHTML = ADS_TASKS.map(task => {
-    const done = taskClaimed(task.id);
-
-    return `
-      <div class="card task">
-        <div class="task-icon">🎬</div>
-        <div class="task-info">
-          <div class="task-title">${escapeHtml(task.title)}</div>
-          <div class="task-reward">Reward configured by backend</div>
-          <div class="task-desc">${done ? "Reward already claimed" : "Complete the ad to request reward credit"}</div>
+  <main class="app">
+
+    <header class="header">
+      <div class="brand">
+        <div class="logo">NX</div>
+        <div>
+          <h1>NX <span style="color:var(--gold)">USDT</span></h1>
+          <p>Watch • Complete • Earn</p>
         </div>
-        <button class="task-button ${done?"done":""}" id="adBtn${task.id}"
-          ${done?"disabled":""} onclick="watchAd(${task.id})">
-          ${done?"✓ Done":"Watch Ad"}
-        </button>
-      </div>`;
-  }).join("");
-}
+      </div>
 
-function renderSocial() {
-  document.getElementById("socialList").innerHTML = SOCIAL_TASKS.map(task => {
-    const done = taskClaimed(task.id);
+      <div class="status">
+        <span class="dot"></span>
+        Mini App
+      </div>
+    </header>
 
-    return `
-      <div class="card task">
-        <div class="task-icon">${task.icon}</div>
-        <div class="task-info">
-          <div class="task-title">${escapeHtml(task.title)}</div>
-          <div class="task-reward">Reward configured by backend</div>
-          <div class="task-desc">${done?"Completed":"Server verification required"}</div>
+    <p class="welcome" id="welcome">Welcome to NX USDT</p>
+
+    <!-- HOME PAGE -->
+
+    <section id="homePanel" class="panel active">
+
+      <div class="balance-card">
+        <div class="balance-label">Available Balance</div>
+
+        <div class="balance">
+          $<span id="balance">0.00</span>
         </div>
-        <button class="task-button ${done?"done":""}" ${done?"disabled":""}
-          onclick="claimSocial(${task.id},this)">
-          ${done?"✓ Done":"Start"}
+
+        <div class="chain-label">
+          USDT • BNB Smart Chain (BEP-20)
+        </div>
+
+        <div class="balance-actions">
+          <button class="btn btn-gold" onclick="goTo('withdraw')">
+            Withdraw
+          </button>
+
+          <button class="btn btn-dark" onclick="goTo('refer')">
+            Refer & Earn
+          </button>
+        </div>
+      </div>
+
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-icon">📺</div>
+          <div class="stat-value" id="adsCount">0/12</div>
+          <div class="stat-label">Ads Today</div>
+        </div>
+
+        <div class="stat">
+          <div class="stat-icon">👥</div>
+          <div class="stat-value" id="refCount">0</div>
+          <div class="stat-label">Referrals</div>
+        </div>
+
+        <div class="stat">
+          <div class="stat-icon">📋</div>
+          <div class="stat-value" id="taskCount">0/2</div>
+          <div class="stat-label">Tasks Approved</div>
+        </div>
+      </div>
+
+      <div class="reward-banner">
+        <div>
+          <h3>🎁 Welcome Bonus</h3>
+          <p>New account bonus, credited once.</p>
+        </div>
+        <div class="reward-amount">$10</div>
+      </div>
+
+      <div class="section-title">
+        <h2>Start Earning</h2>
+        <span>Earn USDT</span>
+      </div>
+
+      <div class="ref-card">
+        <h3>📺 Watch Ads & Complete Tasks</h3>
+        <p>
+          Earn through available ads and social tasks.
+          Check your eligibility and task status on the Earn page.
+        </p>
+
+        <button class="btn btn-gold" style="width:100%;margin-top:10px"
+          onclick="goTo('earn')">
+          Go to Earn →
         </button>
-      </div>`;
-  }).join("");
-}
-
-function renderProgress() {
-  const ads = adsDone();
-  const social = socialDone();
-
-  document.getElementById("adsCount").textContent = `${ads}/5`;
-  document.getElementById("socialCount").textContent = `${social}/4`;
-
-  document.getElementById("adsProgress").textContent = `${ads}/5`;
-  document.getElementById("adsBar").style.width = `${ads/5*100}%`;
-
-  document.getElementById("totalProgress").textContent =
-    `${ads+social}/9 complete`;
-
-  document.getElementById("homeAdsProgress").textContent = `${ads}/5`;
-  document.getElementById("homeAdsBar").style.width = `${ads/5*100}%`;
-
-  document.getElementById("homeSocialProgress").textContent = `${social}/4`;
-  document.getElementById("homeSocialBar").style.width = `${social/4*100}%`;
-
-  renderWithdrawProgress();
-}
-
-function renderWithdrawProgress() {
-  document.getElementById("withdrawAds").textContent = `${adsDone()}/5`;
-  document.getElementById("withdrawSocial").textContent = `${socialDone()}/4`;
-}
-
-function renderReferral() {
-  const el = document.getElementById("referralLink");
-
-  if (!appState.user?.id || CONFIG.BOT_USERNAME === "YOUR_NEW_BOT_USERNAME") {
-    el.textContent = "Referral link will appear after new bot setup.";
-  } else {
-    el.textContent =
-      `https://t.me/${CONFIG.BOT_USERNAME}?start=ref_${appState.user.id}`;
-  }
-
-  const history = document.getElementById("refHistory");
-
-  if (!appState.referralHistory.length) {
-    history.textContent = "Referral history will appear after backend setup.";
-  } else {
-    history.innerHTML = appState.referralHistory.map(ref => `
-      <div class="history-row">
-        <span>${escapeHtml(ref.username || "User")}</span>
-        <strong>${escapeHtml(ref.status || "Verified")}</strong>
       </div>
-    `).join("");
-  }
-}
 
-function renderPayoutHistory() {
-  const el = document.getElementById("payoutHistory");
+    </section>
 
-  if (!appState.payouts.length) {
-    el.innerHTML = '<div class="empty">No withdrawals yet.</div>';
-    return;
-  }
+    <!-- EARN PAGE -->
 
-  el.innerHTML = appState.payouts.map(p => `
-    <div class="history-row">
-      <div>
-        <strong>${money(p.amount)} USDT</strong>
-        <div class="muted">${escapeHtml(p.createdAt || "")}</div>
+    <section id="earnPanel" class="panel">
+
+      <div class="section-title">
+        <h2>Earn USDT</h2>
+        <span>Choose a method</span>
       </div>
-      <span class="history-status">${escapeHtml(p.status || "pending")}</span>
+
+      <div class="tabs">
+        <button class="tab active" id="watchTab"
+          onclick="switchEarnTab('ads')">
+          📺 Watch Ads
+        </button>
+
+        <button class="tab" id="socialTab"
+          onclick="switchEarnTab('social')">
+          📋 Social Tasks
+        </button>
+      </div>
+
+      <div id="adsPanel">
+        <div class="task-list" id="adsList"></div>
+
+        <p class="small-note">
+          Each ad reward: $0.25 USDT. Maximum 12 ads per rolling
+          24 hours. Rewards require genuine ad-completion verification.
+        </p>
+      </div>
+
+      <div id="socialPanel" class="hidden">
+        <div class="task-list" id="socialList"></div>
+
+        <div class="section-title">
+          <h2>YouTube Tasks</h2>
+          <span>Coming soon</span>
+        </div>
+
+        <div class="task-list" id="youtubeList"></div>
+
+        <p class="small-note">
+          Telegram tasks require admin verification.
+          YouTube tasks are not active yet.
+        </p>
+      </div>
+
+    </section>
+
+    <!-- REFER PAGE -->
+
+    <section id="referPanel" class="panel">
+
+      <div class="section-title">
+        <h2>Refer & Earn</h2>
+        <span>Invite friends</span>
+      </div>
+
+      <div class="ref-card">
+        <h3>💰 Earn $5 USDT per referral</h3>
+
+        <p>
+          Share your personal invitation link.
+          The referral reward is credited once for an eligible
+          new registration.
+        </p>
+
+        <div class="reward-banner">
+          <div>
+            <h3>Your Referrals</h3>
+            <p>Successful registrations</p>
+          </div>
+
+          <div class="reward-amount" id="referralCountLarge">0</div>
+        </div>
+
+        <div class="ref-url" id="referralLink">
+          Loading referral link...
+        </div>
+
+        <button class="btn btn-gold" style="width:100%"
+          onclick="copyReferral()">
+          Copy Referral Link
+        </button>
+
+        <button class="btn btn-dark"
+          style="width:100%;margin-top:10px"
+          onclick="shareReferral()">
+          Share with Friends
+        </button>
+      </div>
+
+    </section>
+
+    <!-- WITHDRAW PAGE -->
+
+    <section id="withdrawPanel" class="panel">
+
+      <div class="section-title">
+        <h2>Withdraw USDT</h2>
+        <span>BEP-20</span>
+      </div>
+
+      <div class="withdraw-card">
+        <h3>💸 Request Withdrawal</h3>
+
+        <p>
+          Minimum withdrawal: $5 USDT. Complete the required
+          ads and approved Telegram tasks before requesting.
+        </p>
+
+        <div class="reward-banner">
+          <div>
+            <h3>Available Balance</h3>
+            <p>NX USDT account balance</p>
+          </div>
+
+          <div class="reward-amount">
+            $<span id="withdrawBalance">0.00</span>
+          </div>
+        </div>
+
+        <label for="withdrawAmount" class="small-note">
+          Amount (USDT)
+        </label>
+
+        <input
+          class="input"
+          id="withdrawAmount"
+          type="number"
+          min="5"
+          step="0.01"
+          placeholder="Minimum 5 USDT"
+        >
+
+        <label for="walletAddress" class="small-note">
+          BNB Smart Chain wallet address
+        </label>
+
+        <input
+          class="input"
+          id="walletAddress"
+          type="text"
+          placeholder="0x..."
+          autocomplete="off"
+        >
+
+        <button class="btn btn-gold"
+          style="width:100%;margin-top:12px"
+          onclick="requestWithdrawal()">
+          Request Withdrawal
+        </button>
+
+        <p class="small-note">
+          Automatic payouts are not activated until the
+          backend payment system is securely configured.
+        </p>
+      </div>
+
+      <div class="section-title">
+        <h2>Withdrawal History</h2>
+      </div>
+
+      <div id="payoutHistory" class="task-list">
+        <p class="small-note">No history loaded.</p>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- FOUR-BUTTON NAVIGATION -->
+
+  <nav class="bottom-nav">
+    <div class="nav-inner">
+
+      <button class="nav-btn active" data-page="home"
+        onclick="goTo('home')">
+        <span class="nav-icon">🏠</span>
+        Home
+      </button>
+
+      <button class="nav-btn" data-page="earn"
+        onclick="goTo('earn')">
+        <span class="nav-icon">💰</span>
+        Earn
+      </button>
+
+      <button class="nav-btn" data-page="refer"
+        onclick="goTo('refer')">
+        <span class="nav-icon">👥</span>
+        Refer
+      </button>
+
+      <button class="nav-btn" data-page="withdraw"
+        onclick="goTo('withdraw')">
+        <span class="nav-icon">💸</span>
+        Withdraw
+      </button>
+
     </div>
-  `).join("");
-}
+  </nav>
 
-function renderAll() {
-  renderBalance();
-  renderAds();
-  renderSocial();
-  renderProgress();
-  renderReferral();
-  renderPayoutHistory();
-}
+  <div id="toast" class="toast"></div>
 
-/* ========================================================
-   SYNC
-======================================================== */
+  <script>
+    'use strict';
 
-async function syncApp() {
-  if (!backendReady()) {
-    document.getElementById("connection").textContent = "SETUP";
-    renderAll();
-    return;
-  }
+    // ==========================================
+    // CONFIGURATION
+    // ==========================================
 
-  try {
-    document.getElementById("connection").textContent = "SYNCING";
+    const CONFIG = {
+      API_BASE: 'https://nx-usdt-production.up.railway.app',
+      BOT_USERNAME: 'NXCoinRobot',
+      ADSGRAM_BLOCK_ID: '52783',
+      MAIN_CHANNEL: 'https://t.me/NXUSDTEarn',
+      PAYOUT_CHANNEL: 'https://t.me/NXUSDTPayout',
+      AD_REWARD: 0.25,
+      MAX_ADS: 12,
+      TASK_REWARD: 0.25,
+      YOUTUBE_TASKS: 4,
+      MIN_WITHDRAWAL: 5
+    };
 
-    const data = await api("/sync","POST",{});
+    const tg = window.Telegram?.WebApp;
 
-    appState.balance = Number(data.balance ?? 0);
-    appState.referrals = Number(data.referrals ?? 0);
-    appState.referralReward = Number(data.referralReward ?? 0);
-    appState.tasks = Array.isArray(data.tasks) ? data.tasks : [];
-    appState.payouts = Array.isArray(data.payouts) ? data.payouts : [];
-    appState.referralHistory = Array.isArray(data.referralHistory)
-      ? data.referralHistory : [];
-    appState.user = data.user || null;
+    if (tg) {
+      tg.ready();
+      tg.expand();
 
-    document.getElementById("connection").textContent = "CONNECTED";
-    renderAll();
-  } catch (error) {
-    console.error("Sync error:",error);
-    document.getElementById("connection").textContent = "OFFLINE";
-    showToast(error.message);
-  }
-}
+      try {
+        tg.setHeaderColor('#080d1a');
+        tg.setBackgroundColor('#080d1a');
+      } catch (_) {}
+    }
 
-/* ========================================================
-   ADSGRAM
-======================================================== */
+    let account = null;
+    let busy = false;
+    let toastTimer = null;
 
-async function watchAd(taskId) {
-  if (adsgramBusy) return;
+    // ==========================================
+    // API
+    // ==========================================
 
-  if (taskClaimed(taskId)) {
-    showToast("This ad reward is already claimed.");
-    return;
-  }
+    async function api(path, body = {}) {
+      if (!tg?.initData) {
+        throw new Error(
+          'Please open NX USDT through Telegram.'
+        );
+      }
 
-  if (!backendReady()) {
-    showToast("Ads rewards activate after backend connection.");
-    return;
-  }
+      const response = await fetch(
+        CONFIG.API_BASE.replace(/\/+$/, '') + path,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            ...body,
+            initData: tg.initData
+          })
+        }
+      );
 
-  if (!tg?.initData) {
-    showToast("Open NX Coin from Telegram.");
-    return;
-  }
+      let result;
 
-  if (!window.Adsgram || typeof window.Adsgram.init !== "function") {
-    showToast("AdsGram SDK did not load. Try again.");
-    return;
-  }
+      try {
+        result = await response.json();
+      } catch (_) {
+        throw new Error('Invalid backend response.');
+      }
 
-  const button = document.getElementById("adBtn"+taskId);
-  const oldText = button?.textContent || "Watch Ad";
+      if (!response.ok || result.success === false) {
+        throw new Error(
+          result.error || 'Request failed.'
+        );
+      }
 
-  adsgramBusy = true;
-  if (button) {
-    button.disabled = true;
-    button.textContent = "Loading...";
-  }
+      return result;
+    }
 
-  try {
-    if (!adsgramController) {
-      adsgramController = window.Adsgram.init({
-        blockId:CONFIG.ADSGRAM_BLOCK_ID
+    // ==========================================
+    // TOAST
+    // ==========================================
+
+    function toast(message) {
+      const el = document.getElementById('toast');
+
+      el.textContent = message;
+      el.classList.add('show');
+
+      clearTimeout(toastTimer);
+
+      toastTimer = setTimeout(() => {
+        el.classList.remove('show');
+      }, 3000);
+    }
+
+    // ==========================================
+    // PAGE NAVIGATION
+    // ==========================================
+
+    function goTo(page) {
+      const validPages = [
+        'home',
+        'earn',
+        'refer',
+        'withdraw'
+      ];
+
+      if (!validPages.includes(page)) {
+        page = 'home';
+      }
+
+      document.querySelectorAll('.panel').forEach(el => {
+        el.classList.remove('active');
       });
+
+      document.getElementById(page + 'Panel')
+        .classList.add('active');
+
+      document.querySelectorAll('.nav-btn').forEach(button => {
+        button.classList.toggle(
+          'active',
+          button.dataset.page === page
+        );
+      });
+
+      if (tg?.HapticFeedback) {
+        tg.HapticFeedback.selectionChanged();
+      }
+
+      if (page === 'withdraw') {
+        loadPayoutHistory();
+      }
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    const result = await adsgramController.show();
+    // ==========================================
+    // EARN TABS
+    // ==========================================
 
-    if (!result || result.done !== true) {
-      showToast("Ad not completed. No reward requested.");
-      return;
+    function switchEarnTab(tab) {
+      const adsSelected = tab === 'ads';
+
+      document.getElementById('adsPanel')
+        .classList.toggle('hidden', !adsSelected);
+
+      document.getElementById('socialPanel')
+        .classList.toggle('hidden', adsSelected);
+
+      document.getElementById('watchTab')
+        .classList.toggle('active', adsSelected);
+
+      document.getElementById('socialTab')
+        .classList.toggle('active', !adsSelected);
     }
 
-    const claim = await api("/adsgram/claim","POST",{taskId});
+    // ==========================================
+    // UTILITIES
+    // ==========================================
 
-    if (claim.success || claim.ok) {
-      showToast("Reward claim processed.");
-      await syncApp();
-    } else {
-      showToast(claim.reason || "Reward claim failed.");
+    function safeText(value) {
+      return String(value ?? '').replace(/[&<>"']/g, char => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
+      })[char]);
     }
-  } catch (error) {
-    console.error("AdsGram error:",error);
-    showToast(error.message || "Ad or reward request failed.");
-  } finally {
-    adsgramBusy = false;
-    if (button) {
-      button.disabled = false;
-      button.textContent = oldText;
+
+    function formatMoney(value) {
+      const number = Number(value || 0);
+      return Number.isFinite(number) ? number.toFixed(2) : '0.00';
     }
+
+    // ==========================================
+    // ADS LIST
+    // ==========================================
+
+    function renderAds() {
+      const list = document.getElementById('adsList');
+      list.innerHTML = '';
+
+      for (let i = 1; i <= CONFIG.MAX_ADS; i++) {
+        const adId = 100 + i;
+        const item = document.createElement('div');
+
+        item.className = 'task';
+
+        item.innerHTML = `
+          <div class="task-icon">📺</div>
+          <div class="task-info">
+            <h3>Watch Ad #${i}</h3>
+            <p>Complete one advertisement</p>
+          </div>
+          <div>
+            <div class="task-reward">+$${formatMoney(CONFIG.AD_REWARD)}</div>
+            <button class="task-btn start"
+              id="adBtn${adId}"
+              onclick="watchAd(${adId})">
+              WATCH
+            </button>
+          </div>
+        `;
+
+        list.appendChild(item);
+      }
+    }
+
+    // ==========================================
+    // SOCIAL TASKS
+    // ==========================================
+
+    const SOCIAL_TASKS = [
+      {
+        key: 'telegram_earn',
+        title: 'Join NX USDT Channel',
+        description: 'Join the official earning channel.',
+        icon: '📢',
+        url: CONFIG.MAIN_CHANNEL
+      },
+      {
+        key: 'telegram_payout',
+        title: 'Join Payout Channel',
+        description: 'Receive payout announcements.',
+        icon: '💸',
+        url: CONFIG.PAYOUT_CHANNEL
+      }
+    ];
+
+    function renderSocialTasks() {
+      const list = document.getElementById('socialList');
+      list.innerHTML = '';
+
+      SOCIAL_TASKS.forEach(task => {
+        const status = account?.taskStatus?.[task.key];
+
+        let label = 'START';
+        let css = 'start';
+        let disabled = false;
+
+        if (status === 'pending') {
+          label = 'PENDING';
+          css = 'pending';
+          disabled = true;
+        }
+
+        if (status === 'approved') {
+          label = 'CLAIMED';
+          css = 'claimed';
+          disabled = true;
+        }
+
+        if (status === 'rejected') {
+          label = 'REJECTED';
+          css = 'pending';
+          disabled = true;
+        }
+
+        const item = document.createElement('div');
+        item.className = 'task';
+
+        item.innerHTML = `
+          <div class="task-icon">${task.icon}</div>
+          <div class="task-info">
+            <h3>${safeText(task.title)}</h3>
+            <p>${safeText(task.description)}</p>
+          </div>
+          <div>
+            <div class="task-reward">+$${formatMoney(CONFIG.TASK_REWARD)}</div>
+            <button class="task-btn ${css}"
+              ${disabled ? 'disabled' : ''}
+              onclick="submitSocialTask('${task.key}')">
+              ${label}
+            </button>
+          </div>
+        `;
+
+        list.appendChild(item);
+      });
+
+      const youtubeList = document.getElementById('youtubeList');
+      youtubeList.innerHTML = '';
+
+      for (let i = 1; i <= CONFIG.YOUTUBE_TASKS; i++) {
+        const item = document.createElement('div');
+        item.className = 'task';
+
+        item.innerHTML = `
+          <div class="task-icon">▶️</div>
+          <div class="task-info">
+            <h3>YouTube Task #${i}</h3>
+            <p>Video task will be available later.</p>
+          </div>
+          <div>
+            <div class="task-reward">+$${formatMoney(CONFIG.TASK_REWARD)}</div>
+            <button class="task-btn soon" disabled>
+              COMING SOON
+            </button>
+          </div>
+        `;
+
+        youtubeList.appendChild(item);
+      }
+    }
+
+    // ==========================================
+    // SUBMIT TELEGRAM TASK
+    // ==========================================
+
+    async function submitSocialTask(taskKey) {
+      if (busy) return;
+
+      const task = SOCIAL_TASKS.find(
+        item => item.key === taskKey
+      );
+
+      if (!task) {
+        toast('Task not found.');
+        return;
+      }
+
+      if (tg?.openTelegramLink) {
+        tg.openTelegramLink(task.url);
+      } else {
+        window.open(task.url, '_blank');
+      }
+
+      toast('Join the channel, then return to the Mini App.');
+
+      setTimeout(async () => {
+        const confirmed = window.confirm(
+          'Have you joined the channel? Submit for verification?'
+        );
+
+        if (!confirmed) return;
+
+        try {
+          const result = await api('/tasks/submit', {
+            taskKey
+          });
+
+          toast(result.message || 'Submitted for verification.');
+
+          await loadAccount();
+
+        } catch (error) {
+          toast(error.message);
+        }
+      }, 800);
+    }
+
+    // ==========================================
+    // ADSGRAM
+    // ==========================================
+
+    async function watchAd(adId) {
+      if (busy) return;
+
+      try {
+        await api('/adsgram/claim', { adId });
+      } catch (error) {
+        toast(error.message);
+      }
+    }
+
+    // ==========================================
+    // REFERRALS
+    // ==========================================
+
+    function copyReferral() {
+      const link = account?.referralLink;
+
+      if (!link) {
+        toast('Referral link is loading.');
+        return;
+      }
+
+      if (navigator.clipboard?.writeText) {
+        navigator.clipboard.writeText(link)
+          .then(() => toast('Referral link copied!'))
+          .catch(() => fallbackCopy(link));
+      } else {
+        fallbackCopy(link);
+      }
+    }
+
+    function fallbackCopy(value) {
+      const input = document.createElement('textarea');
+      input.value = value;
+      input.style.position = 'fixed';
+      input.style.opacity = '0';
+
+      document.body.appendChild(input);
+      input.select();
+
+      try {
+        document.execCommand('copy');
+        toast('Referral link copied!');
+      } catch (_) {
+        toast('Copy failed. Copy the link manually.');
+      }
+
+      input.remove();
+    }
+
+    function shareReferral() {
+      const link = account?.referralLink;
+
+      if (!link) {
+        toast('Referral link is loading.');
+        return;
+      }
+
+      const shareUrl =
+        'https://t.me/share/url?url=' +
+        encodeURIComponent(link) +
+        '&text=' +
+        encodeURIComponent('Join NX USDT!');
+
+      if (tg?.openTelegramLink) {
+        tg.openTelegramLink(shareUrl);
+      } else {
+        window.open(shareUrl, '_blank');
+      }
+    }
+
+    // ==========================================
+    // WITHDRAWAL
+    // ==========================================
+
+    async function requestWithdrawal() {
+      if (busy) return;
+
+      const amount = Number(
+        document.getElementById('withdrawAmount').value
+      );
+
+      const walletAddress = document
+        .getElementById('walletAddress')
+        .value
+        .trim();
+
+      if (!Number.isFinite(amount) ||
+          amount < CONFIG.MIN_WITHDRAWAL) {
+        toast('Minimum withdrawal is 5 USDT.');
+        return;
+      }
+
+      if (!/^0x[a-fA-F0-9]{40}$/.test(walletAddress)) {
+        toast('Enter a valid BNB Smart Chain wallet address.');
+        return;
+      }
+
+      if (!account || amount > Number(account.balance || 0)) {
+        toast('Insufficient account balance.');
+        return;
+      }
+
+      if (!account.canWithdraw) {
+        toast(
+          `Complete ${account.requiredAds} ads and get ${account.requiredTasks} Telegram tasks approved first.`
+        );
+        return;
+      }
+
+      try {
+        busy = true;
+
+        const result = await api('/payout', {
+          amount,
+          walletAddress
+        });
+
+        toast(result.message || 'Withdrawal request submitted.');
+
+        await loadAccount();
+
+      } catch (error) {
+        toast(error.message);
+
+      } finally {
+        busy = false;
+      }
+    }
+
+    // ==========================================
+    // PAYOUT HISTORY
+    // ==========================================
+
+    async function loadPayoutHistory() {
+      const container = document.getElementById('payoutHistory');
+
+      try {
+        const result = await api('/payouts');
+        const payouts = result.payouts || [];
+
+        if (!payouts.length) {
+          container.innerHTML =
+            '<p class="small-note">No withdrawals yet.</p>';
+          return;
+        }
+
+        container.innerHTML = '';
+
+        payouts.forEach(payout => {
+          const item = document.createElement('div');
+          item.className = 'task';
+
+          item.innerHTML = `
+            <div class="task-icon">💸</div>
+            <div class="task-info">
+              <h3>${safeText(payout.status)}</h3>
+              <p>${safeText(payout.created_at || '')}</p>
+            </div>
+            <div class="task-reward">
+              $${formatMoney(payout.amount_usdt)}
+            </div>
+          `;
+
+          container.appendChild(item);
+        });
+
+      } catch (_) {
+        container.innerHTML =
+          '<p class="small-note">Could not load payout history.</p>';
+      }
+    }
+
+    // ==========================================
+    // LOAD USER ACCOUNT
+    // ==========================================
+
+    async function loadAccount() {
+      try {
+        const result = await api('/sync', {
+          startParam: tg?.initDataUnsafe?.start_param || ''
+        });
+
+        account = result;
+
+        document.getElementById('welcome').textContent =
+          'Welcome, ' + (result.user?.first_name || 'User') + '!';
+
+        document.getElementById('balance').textContent =
+          formatMoney(result.balance);
+
+        document.getElementById('withdrawBalance').textContent =
+          formatMoney(result.balance);
+
+        document.getElementById('adsCount').textContent =
+          `${result.adsWatched || 0}/12`;
+
+        document.getElementById('refCount').textContent =
+          result.referrals || 0;
+
+        document.getElementById('referralCountLarge').textContent =
+          result.referrals || 0;
+
+        document.getElementById('taskCount').textContent =
+          `${result.tasksCompleted || 0}/2`;
+
+        document.getElementById('referralLink').textContent =
+          result.referralLink || 'Referral link unavailable';
+
+        renderSocialTasks();
+
+      } catch (error) {
+        console.error(error);
+        toast(error.message);
+
+        document.getElementById('welcome').textContent =
+          'Open NX USDT through Telegram to continue.';
+      }
+    }
+
+    // ==========================================
+    // INITIALIZE
+    // ==========================================
+
     renderAds();
-  }
-}
+    renderSocialTasks();
 
-/* ========================================================
-   SOCIAL TASKS
-======================================================== */
-
-async function claimSocial(taskId,button) {
-  if (!backendReady()) {
-    showToast("Social tasks activate after backend connection.");
-    return;
-  }
-
-  const oldText = button.textContent;
-  button.disabled = true;
-  button.textContent = "Checking...";
-
-  try {
-    const result = await api("/earn","POST",{taskId});
-
-    if (result.success || result.ok) {
-      showToast("Task request accepted.");
-      await syncApp();
+    if (tg?.initData) {
+      loadAccount();
     } else {
-      showToast(result.reason || "Task verification failed.");
+      document.getElementById('welcome').textContent =
+        'Open this Mini App through Telegram to sign in.';
     }
-  } catch (error) {
-    showToast(error.message || "Task request failed.");
-  } finally {
-    button.disabled = false;
-    button.textContent = oldText;
-  }
-}
-
-/* ========================================================
-   REFERRAL ACTIONS
-======================================================== */
-
-function referralLinkValue() {
-  const text = document.getElementById("referralLink").textContent.trim();
-
-  if (!text.startsWith("https://t.me/")) return "";
-  return text;
-}
-
-async function copyReferral() {
-  const link = referralLinkValue();
-
-  if (!link) {
-    showToast("Referral link available after bot setup.");
-    return;
-  }
-
-  try {
-    await navigator.clipboard.writeText(link);
-    showToast("Referral link copied!");
-  } catch {
-    const temp = document.createElement("textarea");
-    temp.value = link;
-    document.body.appendChild(temp);
-    temp.select();
-    document.execCommand("copy");
-    temp.remove();
-    showToast("Referral link copied!");
-  }
-}
-
-function shareReferral() {
-  const link = referralLinkValue();
-
-  if (!link) {
-    showToast("Referral link available after bot setup.");
-    return;
-  }
-
-  const shareUrl = "https://t.me/share/url?url=" +
-    encodeURIComponent(link) +
-    "&text=" + encodeURIComponent("Join NX Coin and explore rewards!");
-
-  if (tg?.openTelegramLink) {
-    tg.openTelegramLink(shareUrl);
-  } else {
-    window.open(shareUrl,"_blank");
-  }
-}
-
-/* ========================================================
-   WITHDRAW
-======================================================== */
-
-async function withdraw() {
-  if (!backendReady()) {
-    showToast("Withdrawal backend is not connected yet.");
-    return;
-  }
-
-  const wallet = document.getElementById("wallet").value.trim();
-  const amount = Number(document.getElementById("amount").value);
-  const button = document.getElementById("withdrawBtn");
-
-  if (!/^0x[a-fA-F0-9]{40}$/.test(wallet)) {
-    showToast("Enter a valid BSC wallet address.");
-    return;
-  }
-
-  if (!Number.isFinite(amount) || amount < CONFIG.MIN_WITHDRAWAL_USDT) {
-    showToast("Minimum withdrawal is 5 USDT.");
-    return;
-  }
-
-  if (appState.balance === null || amount > appState.balance) {
-    showToast("Insufficient balance.");
-    return;
-  }
-
-  if (adsDone() < CONFIG.REQUIRED_ADS ||
-      socialDone() < CONFIG.REQUIRED_SOCIAL_TASKS) {
-    showToast("Complete 5 ads and 4 social tasks first.");
-    return;
-  }
-
-  if (!window.confirm(
-    `Confirm withdrawal of ${amount} USDT to this BSC wallet?\n\n${wallet}`
-  )) return;
-
-  button.disabled = true;
-  button.textContent = "Processing...";
-
-  try {
-    const result = await api("/payout","POST",{wallet,amount});
-    showToast("Withdrawal request submitted: " +
-      (result.payout?.status || "pending"));
-    document.getElementById("amount").value = "";
-    await syncApp();
-  } catch (error) {
-    showToast(error.message || "Withdrawal request failed.");
-  } finally {
-    button.disabled = false;
-    button.textContent = "Request Withdrawal";
-  }
-}
-
-/* ========================================================
-   INIT
-======================================================== */
-
-renderAll();
-syncApp();
-</script>
+  </script>
 </body>
 </html>
