@@ -24,7 +24,7 @@ body{
 }
 button,input{font:inherit}
 button{cursor:pointer}
-button:disabled{opacity:.55;cursor:not-allowed}
+button:disabled{opacity:.65;cursor:not-allowed}
 .app{max-width:520px;margin:auto;padding:18px 15px}
 .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
 .brand{display:flex;align-items:center;gap:11px}
@@ -85,6 +85,7 @@ button:disabled{opacity:.55;cursor:not-allowed}
 .task-btn.start{background:var(--gold);color:#151515}
 .task-btn.pending{background:#5a4925;color:#ffe39b}
 .task-btn.claimed{background:rgba(61,220,151,.13);color:var(--green)}
+.task-btn.cooldown{background:#242d40;color:#aab5c8;min-width:100px;font-size:10px}
 .task-btn.soon{background:#242d40;color:#aab5c8}
 .small-note{font-size:11px;line-height:1.6;color:var(--muted);margin:12px 2px}
 .panel{display:none}
@@ -170,7 +171,7 @@ button:disabled{opacity:.55;cursor:not-allowed}
 
   <div id="adsPanel">
     <div class="task-list" id="adsList"></div>
-    <p class="small-note">Each verified ad reward: $0.25 USDT. Maximum 12 ads per rolling 24 hours.</p>
+    <p class="small-note">Each verified ad reward: $0.25 USDT. Each ad slot has its own 24-hour cooldown after a successful reward.</p>
   </div>
 
   <div id="socialPanel" class="hidden">
@@ -242,7 +243,8 @@ const CONFIG = {
   MAX_ADS: 12,
   TASK_REWARD: 0.25,
   YOUTUBE_TASKS: 4,
-  MIN_WITHDRAWAL: 5
+  MIN_WITHDRAWAL: 5,
+  AD_COOLDOWN_MS: 24 * 60 * 60 * 1000
 };
 
 const tg = window.Telegram?.WebApp;
@@ -250,6 +252,9 @@ let account = null;
 let busy = false;
 let toastTimer = null;
 let adsgramController = null;
+let cooldownTimer = null;
+let adCooldowns = {};
+let cooldownStorageKey = 'nxusdt_ad_cooldowns_v1';
 
 if (tg) {
   tg.ready();
@@ -336,6 +341,103 @@ function formatMoney(value) {
   return Number.isFinite(n) ? n.toFixed(2) : '0.00';
 }
 
+/* Cooldown storage is keyed by Telegram account and ad slot. */
+function setCooldownStorageKey() {
+  const userId = tg?.initDataUnsafe?.user?.id;
+  cooldownStorageKey = 'nxusdt_ad_cooldowns_v1_' + (userId || 'telegram');
+}
+
+function loadLocalCooldowns() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(cooldownStorageKey) || '{}');
+    const now = Date.now();
+    adCooldowns = {};
+
+    for (let id = 1; id <= CONFIG.MAX_ADS; id++) {
+      const until = Number(saved[id] || 0);
+      if (until > now) adCooldowns[id] = until;
+    }
+
+    saveLocalCooldowns();
+  } catch (error) {
+    console.warn('Could not read ad cooldowns:', error);
+    adCooldowns = {};
+  }
+}
+
+function saveLocalCooldowns() {
+  try {
+    localStorage.setItem(cooldownStorageKey, JSON.stringify(adCooldowns));
+  } catch (error) {
+    console.warn('Could not save ad cooldowns:', error);
+  }
+}
+
+function startAdCooldown(adId, timestamp = Date.now()) {
+  adCooldowns[adId] = Number(timestamp) + CONFIG.AD_COOLDOWN_MS;
+  saveLocalCooldowns();
+  updateAdButton(adId);
+}
+
+function getRemainingMs(adId) {
+  const until = Number(adCooldowns[adId] || 0);
+  const remaining = until - Date.now();
+
+  if (remaining <= 0) {
+    if (until) {
+      delete adCooldowns[adId];
+      saveLocalCooldowns();
+    }
+    return 0;
+  }
+
+  return remaining;
+}
+
+function formatCountdown(ms) {
+  const totalSeconds = Math.max(0, Math.ceil(ms / 1000));
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+
+  return String(hours).padStart(2,'0') + ':' +
+         String(minutes).padStart(2,'0') + ':' +
+         String(seconds).padStart(2,'0');
+}
+
+function updateAdButton(adId) {
+  const button = document.getElementById('adBtn' + adId);
+  if (!button) return;
+
+  const remaining = getRemainingMs(adId);
+
+  if (remaining > 0) {
+    button.disabled = true;
+    button.className = 'task-btn cooldown';
+    button.textContent = formatCountdown(remaining);
+    button.title = 'This ad slot will be available after its 24-hour cooldown.';
+  } else {
+    button.disabled = Boolean(busy);
+    button.className = 'task-btn start';
+    button.textContent = 'WATCH';
+    button.title = 'Watch this advertisement.';
+  }
+}
+
+function updateAllAdButtons() {
+  for (let id = 1; id <= CONFIG.MAX_ADS; id++) {
+    updateAdButton(id);
+  }
+}
+
+function startCooldownTicker() {
+  if (cooldownTimer) clearInterval(cooldownTimer);
+
+  cooldownTimer = setInterval(() => {
+    updateAllAdButtons();
+  }, 1000);
+}
+
 function renderAds() {
   const list = document.getElementById('adsList');
   list.innerHTML = '';
@@ -347,7 +449,7 @@ function renderAds() {
       <div class="task-icon">📺</div>
       <div class="task-info">
         <h3>Watch Ad #${adId}</h3>
-        <p>Complete one advertisement</p>
+        <p id="adStatus${adId}">Complete one advertisement</p>
       </div>
       <div>
         <div class="task-reward">+$${formatMoney(CONFIG.AD_REWARD)}</div>
@@ -355,6 +457,8 @@ function renderAds() {
       </div>`;
     list.appendChild(item);
   }
+
+  updateAllAdButtons();
 }
 
 const SOCIAL_TASKS = [
@@ -437,6 +541,7 @@ async function submitSocialTask(taskKey) {
       toast(error.message);
     } finally {
       busy = false;
+      updateAllAdButtons();
     }
   },700);
 }
@@ -460,13 +565,6 @@ function getAdsgramController() {
   return adsgramController;
 }
 
-/*
- * AdsGram flow:
- * 1. Create a pending attempt on the backend.
- * 2. Show the ad.
- * 3. Call /adsgram/claim after show() resolves.
- * 4. Reload the balance from the backend.
- */
 async function watchAd(adId) {
   if (busy) return;
 
@@ -474,15 +572,27 @@ async function watchAd(adId) {
     return toast('Invalid ad slot.');
   }
 
+  const remaining = getRemainingMs(adId);
+
+  if (remaining > 0) {
+    updateAdButton(adId);
+    return toast('This ad slot is locked for ' + formatCountdown(remaining) + '.');
+  }
+
   const button = document.getElementById('adBtn' + adId);
+  const statusText = document.getElementById('adStatus' + adId);
 
   try {
     busy = true;
+    updateAllAdButtons();
 
     if (button) {
       button.disabled = true;
+      button.className = 'task-btn pending';
       button.textContent = 'LOADING';
     }
+
+    if (statusText) statusText.textContent = 'Preparing advertisement...';
 
     const controller = getAdsgramController();
 
@@ -494,20 +604,21 @@ async function watchAd(adId) {
       throw new Error(start.result.reason || start.result.error || 'Ad attempt denied.');
     }
 
+    if (start.success === false) {
+      throw new Error(start.error || 'Ad attempt denied.');
+    }
+
     let adResult;
 
     try {
       adResult = await controller.show();
     } catch (error) {
       console.warn('AdsGram show error:',error);
+      if (statusText) statusText.textContent = 'Ad not completed. Try again.';
       toast('Ad was not completed. No reward was requested.');
       return;
     }
 
-    /*
-     * Some SDK versions return an object; others simply resolve.
-     * The backend claim endpoint must still enforce pending attempts.
-     */
     toast('Ad finished. Requesting reward verification...');
 
     const claim = await api('/adsgram/claim',{adId});
@@ -516,189 +627,10 @@ async function watchAd(adId) {
       throw new Error(claim.error || 'Reward was not credited.');
     }
 
-    await loadAccount();
+    /*
+     * Start the local visual timer only after the claim succeeds.
+     * Backend cooldown enforcement remains essential.
+     */
+    startAdCooldown(adId, Date.now());
 
-    toast('Reward processed. Balance: $' + formatMoney(account?.balance));
-  } catch (error) {
-    console.error('AdsGram reward error:',error);
-    toast(error.message || 'Could not process ad reward.');
-  } finally {
-    busy = false;
-
-    if (button) {
-      button.disabled = false;
-      button.textContent = 'WATCH';
-    }
-  }
-}
-
-function copyReferral() {
-  const link = account?.referralLink;
-  if (!link) return toast('Referral link is loading.');
-
-  if (navigator.clipboard?.writeText) {
-    navigator.clipboard.writeText(link)
-      .then(()=>toast('Referral link copied!'))
-      .catch(()=>fallbackCopy(link));
-  } else {
-    fallbackCopy(link);
-  }
-}
-
-function fallbackCopy(value) {
-  const input = document.createElement('textarea');
-  input.value = value;
-  input.style.position = 'fixed';
-  input.style.opacity = '0';
-  document.body.appendChild(input);
-  input.select();
-
-  try {
-    document.execCommand('copy');
-    toast('Referral link copied!');
-  } catch (_) {
-    toast('Copy failed. Copy the link manually.');
-  }
-
-  input.remove();
-}
-
-function shareReferral() {
-  const link = account?.referralLink;
-  if (!link) return toast('Referral link is loading.');
-
-  const url = 'https://t.me/share/url?url=' + encodeURIComponent(link) +
-    '&text=' + encodeURIComponent('Join NX USDT!');
-
-  if (tg?.openTelegramLink) tg.openTelegramLink(url);
-  else window.open(url,'_blank','noopener');
-}
-
-async function requestWithdrawal() {
-  if (busy) return;
-
-  const amount = Number(document.getElementById('withdrawAmount').value);
-  const walletAddress = document.getElementById('walletAddress').value.trim();
-
-  if (!Number.isFinite(amount) || amount < CONFIG.MIN_WITHDRAWAL) {
-    return toast('Minimum withdrawal is 5 USDT.');
-  }
-
-  if (!/^0x[a-fA-F0-9]{40}$/.test(walletAddress)) {
-    return toast('Enter a valid BNB Smart Chain wallet address.');
-  }
-
-  if (!account || amount > Number(account.balance || 0)) {
-    return toast('Insufficient account balance.');
-  }
-
-  if (!account.canWithdraw) {
-    return toast(`Complete ${account.requiredAds} verified ads and get ${account.requiredTasks} Telegram tasks approved first.`);
-  }
-
-  try {
-    busy = true;
-
-    const result = await api('/payout',{amount,walletAddress});
-
-    toast(result.message || 'Withdrawal request submitted. Transfer is not automatic.');
-
-    await loadAccount();
-    await loadPayoutHistory();
-  } catch (error) {
-    toast(error.message);
-  } finally {
-    busy = false;
-  }
-}
-
-async function loadPayoutHistory() {
-  const container = document.getElementById('payoutHistory');
-
-  try {
-    const result = await api('/payouts');
-    const payouts = result.payouts || [];
-
-    if (!payouts.length) {
-      container.innerHTML = '<p class="small-note">No withdrawals yet.</p>';
-      return;
-    }
-
-    container.innerHTML = '';
-
-    payouts.forEach(payout => {
-      const item = document.createElement('div');
-      item.className = 'task';
-      item.innerHTML = `
-        <div class="task-icon">💸</div>
-        <div class="task-info">
-          <h3>${safeText(payout.status || 'pending')}</h3>
-          <p>${safeText(payout.created_at || '')}</p>
-        </div>
-        <div class="task-reward">$${formatMoney(payout.amount_usdt)}</div>`;
-      container.appendChild(item);
-    });
-  } catch (error) {
-    container.innerHTML = `<p class="small-note">${safeText(error.message || 'Could not load payout history.')}</p>`;
-  }
-}
-
-async function loadAccount() {
-  const result = await api('/sync',{
-    startParam:tg?.initDataUnsafe?.start_param || ''
-  });
-
-  account = result;
-
-  document.getElementById('welcome').textContent =
-    'Welcome, ' + (result.user?.first_name || 'User') + '!';
-
-  document.getElementById('balance').textContent =
-    formatMoney(result.balance);
-
-  document.getElementById('withdrawBalance').textContent =
-    formatMoney(result.balance);
-
-  document.getElementById('adsCount').textContent =
-    `${result.adsWatched || 0}/${CONFIG.MAX_ADS}`;
-
-  document.getElementById('refCount').textContent =
-    result.referrals || 0;
-
-  document.getElementById('referralCountLarge').textContent =
-    result.referrals || 0;
-
-  document.getElementById('taskCount').textContent =
-    `${result.tasksCompleted || 0}/${result.requiredTasks || 2}`;
-
-  document.getElementById('referralLink').textContent =
-    result.referralLink || 'Referral link unavailable';
-
-  renderSocialTasks();
-}
-
-async function initialize() {
-  renderAds();
-  renderSocialTasks();
-
-  if (!tg?.initData) {
-    document.getElementById('welcome').textContent =
-      'Open this Mini App through Telegram to sign in.';
-    toast('Telegram authentication is required.');
-    return;
-  }
-
-  try {
-    await loadAccount();
-  } catch (error) {
-    console.error('Account load failed:',error);
-    document.getElementById('welcome').textContent =
-      'Could not load account. Reopen the Mini App.';
-    toast(error.message || 'Could not load account.');
-  }
-}
-
-initialize();
-</script>
-</body>
-</html>
+    if (status
