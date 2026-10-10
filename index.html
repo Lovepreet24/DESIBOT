@@ -656,7 +656,8 @@ async function watchAd(adId) {
       stopIntercept();
     }
 
-    if (!adClickDetected) {
+        if (!adClickDetected) {
+      try { await api('/adsgram/cancel'); } catch (_) {}
       if (statusText) statusText.textContent = 'Tap "Go!" on the ad to earn the reward.';
       toast('You must click the "Go!" button on the ad to receive the reward.');
       return;
