@@ -564,7 +564,44 @@ function getAdsgramController() {
 
   return adsgramController;
 }
+let adClickDetected = false;
 
+/* Detects the AdsGram "Click" tracking request fired when the user taps "Go!". */
+function interceptAdsgramClick() {
+  adClickDetected = false;
+
+  const originalFetch = window.fetch;
+  const originalOpen = XMLHttpRequest.prototype.open;
+  const originalBeacon = navigator.sendBeacon ? navigator.sendBeacon.bind(navigator) : null;
+
+  const isClickUrl = url =>
+    typeof url === 'string' && url.includes('adsgram.ai') && url.includes('type=Click');
+
+  window.fetch = function (...args) {
+    const url = typeof args[0] === 'string' ? args[0] : (args[0] && args[0].url) || '';
+    if (isClickUrl(url)) adClickDetected = true;
+    return originalFetch.apply(this, args);
+  };
+
+  XMLHttpRequest.prototype.open = function (method, url, ...rest) {
+    if (isClickUrl(url)) adClickDetected = true;
+    return originalOpen.call(this, method, url, ...rest);
+  };
+
+  if (originalBeacon) {
+    navigator.sendBeacon = function (url, data) {
+      if (isClickUrl(url)) adClickDetected = true;
+      return originalBeacon(url, data);
+    };
+  }
+
+  return function restore() {
+    window.fetch = originalFetch;
+    XMLHttpRequest.prototype.open = originalOpen;
+    if (originalBeacon) navigator.sendBeacon = originalBeacon;
+  };
+}
+  
 async function watchAd(adId) {
   if (busy) return;
 
@@ -573,7 +610,6 @@ async function watchAd(adId) {
   }
 
   const remaining = getRemainingMs(adId);
-
   if (remaining > 0) {
     updateAdButton(adId);
     return toast('This ad slot is locked for ' + formatCountdown(remaining) + '.');
@@ -591,46 +627,47 @@ async function watchAd(adId) {
       button.className = 'task-btn pending';
       button.textContent = 'LOADING';
     }
-
     if (statusText) statusText.textContent = 'Preparing advertisement...';
 
     const controller = getAdsgramController();
 
     toast('Starting advertisement...');
 
-    const start = await api('/adsgram/start',{adId});
+    const start = await api('/adsgram/start', { adId });
 
     if (start.result?.success === false) {
       throw new Error(start.result.reason || start.result.error || 'Ad attempt denied.');
     }
-
     if (start.success === false) {
       throw new Error(start.error || 'Ad attempt denied.');
     }
 
-    let adResult;
+    /* Watch for the "Go!" click while the ad is on screen. */
+    const stopIntercept = interceptAdsgramClick();
 
     try {
-      adResult = await controller.show();
+      await controller.show();
     } catch (error) {
-      console.warn('AdsGram show error:',error);
-      if (statusText) statusText.textContent = 'Ad not completed. Try again.';
-      toast('Ad was not completed. No reward was requested.');
+      console.warn('AdsGram show error:', error);
+      /* Skipped/closed ads reject; the click check below still decides the reward. */
+    } finally {
+      stopIntercept();
+    }
+
+    if (!adClickDetected) {
+      if (statusText) statusText.textContent = 'Tap "Go!" on the ad to earn the reward.';
+      toast('You must click the "Go!" button on the ad to receive the reward.');
       return;
     }
 
-    toast('Ad finished. Requesting reward verification...');
+    toast('Ad clicked. Requesting reward verification...');
 
-    const claim = await api('/adsgram/claim',{adId});
+    const claim = await api('/adsgram/claim', { adId, clicked: true });
 
     if (claim.success !== true) {
       throw new Error(claim.error || 'Reward was not credited.');
     }
 
-    /*
-     * Start the local visual timer only after the claim succeeds.
-     * Backend cooldown enforcement remains essential.
-     */
     startAdCooldown(adId, Date.now());
 
     if (statusText) statusText.textContent = 'Completed. Available again in 24 hours.';
@@ -639,7 +676,7 @@ async function watchAd(adId) {
 
     toast('Reward processed. Balance: $' + formatMoney(account?.balance));
   } catch (error) {
-    console.error('AdsGram reward error:',error);
+    console.error('AdsGram reward error:', error);
     if (statusText) statusText.textContent = 'Available status will refresh on retry.';
     toast(error.message || 'Could not process ad reward.');
   } finally {
