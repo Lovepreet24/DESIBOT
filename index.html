@@ -10,24 +10,17 @@
 <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
 
 <style>
-:root {
-  --bg:#080d1a;
-  --panel:#111a2d;
-  --panel2:#162139;
-  --gold:#f5c451;
-  --gold2:#ffe29a;
-  --text:#fff;
-  --muted:#98a5bd;
-  --green:#3ddc97;
-  --border:rgba(255,255,255,.08);
+:root{
+  --bg:#080d1a;--panel:#111a2d;--panel2:#162139;
+  --gold:#f5c451;--gold2:#ffe29a;--text:#fff;
+  --muted:#98a5bd;--green:#3ddc97;
+  --border:rgba(255,255,255,.08)
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 body{
   margin:0;
   background:radial-gradient(ellipse at top,rgba(245,196,81,.09),transparent 55%),var(--bg);
-  color:var(--text);
-  font-family:Arial,Helvetica,sans-serif;
-  padding-bottom:95px
+  color:var(--text);font-family:Arial,Helvetica,sans-serif;padding-bottom:95px
 }
 button,input{font:inherit}
 button{cursor:pointer}
@@ -36,13 +29,16 @@ button:disabled{opacity:.55;cursor:not-allowed}
 .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
 .brand{display:flex;align-items:center;gap:11px}
 .logo{
-  height:45px;width:45px;display:grid;place-items:center;
-  border-radius:15px;background:linear-gradient(135deg,#ffe39b,#d49b24);
+  height:45px;width:45px;display:grid;place-items:center;border-radius:15px;
+  background:linear-gradient(135deg,#ffe39b,#d49b24);
   color:#111827;font-weight:900;font-size:19px
 }
 .brand h1{font-size:21px;margin:0}
 .brand p{font-size:11px;color:var(--muted);margin:5px 0 0}
-.status{display:flex;align-items:center;gap:5px;color:var(--green);font-size:11px;background:rgba(61,220,151,.08);padding:8px 10px;border-radius:20px}
+.status{
+  display:flex;align-items:center;gap:5px;color:var(--green);
+  font-size:11px;background:rgba(61,220,151,.08);padding:8px 10px;border-radius:20px
+}
 .dot{height:6px;width:6px;background:var(--green);border-radius:50%}
 .welcome{font-size:14px;color:var(--muted);margin:10px 0 15px}
 .balance-card{
@@ -68,8 +64,9 @@ button:disabled{opacity:.55;cursor:not-allowed}
 .stat-label{font-size:10px;color:var(--muted);margin-top:5px}
 .reward-banner{
   background:linear-gradient(110deg,#25213a,#182039);
-  border:1px solid rgba(245,196,81,.15);border-radius:17px;padding:15px;
-  margin-top:17px;display:flex;align-items:center;justify-content:space-between;gap:12px
+  border:1px solid rgba(245,196,81,.15);border-radius:17px;
+  padding:15px;margin-top:17px;display:flex;align-items:center;
+  justify-content:space-between;gap:12px
 }
 .reward-banner h3{font-size:14px;margin:0 0 6px}
 .reward-banner p{font-size:11px;color:var(--muted);margin:0;line-height:1.5}
@@ -173,7 +170,7 @@ button:disabled{opacity:.55;cursor:not-allowed}
 
   <div id="adsPanel">
     <div class="task-list" id="adsList"></div>
-    <p class="small-note">Each verified ad reward: $0.25 USDT. Maximum 12 ads per rolling 24 hours. Rewards require server-side verification.</p>
+    <p class="small-note">Each verified ad reward: $0.25 USDT. Maximum 12 ads per rolling 24 hours.</p>
   </div>
 
   <div id="socialPanel" class="hidden">
@@ -253,7 +250,6 @@ let account = null;
 let busy = false;
 let toastTimer = null;
 let adsgramController = null;
-let lastAdsCount = 0;
 
 if (tg) {
   tg.ready();
@@ -274,14 +270,11 @@ async function api(path, body = {}) {
   try {
     response = await fetch(CONFIG.API_BASE + path, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        ...body,
-        initData: tg.initData
-      })
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({...body, initData:tg.initData})
     });
   } catch (_) {
-    throw new Error('Failed to fetch. Check internet, CORS and backend URL.');
+    throw new Error('Network error. Check your internet and backend.');
   }
 
   let result;
@@ -289,7 +282,7 @@ async function api(path, body = {}) {
   try {
     result = await response.json();
   } catch (_) {
-    throw new Error('Backend returned an invalid response.');
+    throw new Error('Invalid response from backend.');
   }
 
   if (!response.ok || result.success === false) {
@@ -304,11 +297,11 @@ function toast(message) {
   el.textContent = message;
   el.classList.add('show');
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => el.classList.remove('show'), 3500);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 4000);
 }
 
 function goTo(page) {
-  if (!['home', 'earn', 'refer', 'withdraw'].includes(page)) page = 'home';
+  if (!['home','earn','refer','withdraw'].includes(page)) page = 'home';
 
   document.querySelectorAll('.panel').forEach(el => el.classList.remove('active'));
   document.getElementById(page + 'Panel').classList.add('active');
@@ -320,31 +313,27 @@ function goTo(page) {
   if (tg?.HapticFeedback) tg.HapticFeedback.selectionChanged();
   if (page === 'withdraw') loadPayoutHistory();
 
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  window.scrollTo({top:0,behavior:'smooth'});
 }
 
 function switchEarnTab(tab) {
   const ads = tab === 'ads';
 
-  document.getElementById('adsPanel').classList.toggle('hidden', !ads);
-  document.getElementById('socialPanel').classList.toggle('hidden', ads);
-  document.getElementById('watchTab').classList.toggle('active', ads);
-  document.getElementById('socialTab').classList.toggle('active', !ads);
+  document.getElementById('adsPanel').classList.toggle('hidden',!ads);
+  document.getElementById('socialPanel').classList.toggle('hidden',ads);
+  document.getElementById('watchTab').classList.toggle('active',ads);
+  document.getElementById('socialTab').classList.toggle('active',!ads);
 }
 
 function safeText(value) {
-  return String(value ?? '').replace(/[&<>"']/g, char => ({
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    "'": '&#39;'
-  })[char]);
+  return String(value ?? '').replace(/[&<>"']/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  })[c]);
 }
 
 function formatMoney(value) {
-  const number = Number(value || 0);
-  return Number.isFinite(number) ? number.toFixed(2) : '0.00';
+  const n = Number(value || 0);
+  return Number.isFinite(n) ? n.toFixed(2) : '0.00';
 }
 
 function renderAds() {
@@ -354,7 +343,6 @@ function renderAds() {
   for (let adId = 1; adId <= CONFIG.MAX_ADS; adId++) {
     const item = document.createElement('div');
     item.className = 'task';
-
     item.innerHTML = `
       <div class="task-icon">📺</div>
       <div class="task-info">
@@ -365,26 +353,13 @@ function renderAds() {
         <div class="task-reward">+$${formatMoney(CONFIG.AD_REWARD)}</div>
         <button class="task-btn start" id="adBtn${adId}" onclick="watchAd(${adId})">WATCH</button>
       </div>`;
-
     list.appendChild(item);
   }
 }
 
 const SOCIAL_TASKS = [
-  {
-    key: 'telegram_earn',
-    title: 'Join NX USDT Channel',
-    description: 'Join the official earning channel.',
-    icon: '📢',
-    url: CONFIG.MAIN_CHANNEL
-  },
-  {
-    key: 'telegram_payout',
-    title: 'Join Payout Channel',
-    description: 'Receive payout announcements.',
-    icon: '💸',
-    url: CONFIG.PAYOUT_CHANNEL
-  }
+  {key:'telegram_earn',title:'Join NX USDT Channel',description:'Join the official earning channel.',icon:'📢',url:CONFIG.MAIN_CHANNEL},
+  {key:'telegram_payout',title:'Join Payout Channel',description:'Receive payout announcements.',icon:'💸',url:CONFIG.PAYOUT_CHANNEL}
 ];
 
 function renderSocialTasks() {
@@ -393,26 +368,18 @@ function renderSocialTasks() {
 
   SOCIAL_TASKS.forEach(task => {
     const status = account?.taskStatus?.[task.key];
-
-    let label = 'START';
-    let css = 'start';
-    let disabled = false;
+    let label = 'START', css = 'start', disabled = false;
 
     if (status === 'pending') {
-      label = 'PENDING';
-      css = 'pending';
-      disabled = true;
+      label = 'PENDING'; css = 'pending'; disabled = true;
     } else if (status === 'approved') {
-      label = 'APPROVED';
-      css = 'claimed';
-      disabled = true;
+      label = 'APPROVED'; css = 'claimed'; disabled = true;
     } else if (status === 'rejected') {
       label = 'RETRY';
     }
 
     const item = document.createElement('div');
     item.className = 'task';
-
     item.innerHTML = `
       <div class="task-icon">${task.icon}</div>
       <div class="task-info">
@@ -421,50 +388,40 @@ function renderSocialTasks() {
       </div>
       <div>
         <div class="task-reward">+$${formatMoney(CONFIG.TASK_REWARD)}</div>
-        <button class="task-btn ${css}" ${disabled ? 'disabled' : ''}
+        <button class="task-btn ${css}" ${disabled?'disabled':''}
           onclick="submitSocialTask('${task.key}')">${label}</button>
       </div>`;
-
     list.appendChild(item);
   });
 
-  const youtubeList = document.getElementById('youtubeList');
-  youtubeList.innerHTML = '';
+  const youtube = document.getElementById('youtubeList');
+  youtube.innerHTML = '';
 
-  for (let i = 1; i <= CONFIG.YOUTUBE_TASKS; i++) {
+  for (let i=1;i<=CONFIG.YOUTUBE_TASKS;i++) {
     const item = document.createElement('div');
     item.className = 'task';
     item.innerHTML = `
       <div class="task-icon">▶️</div>
-      <div class="task-info">
-        <h3>YouTube Task #${i}</h3>
-        <p>Video task will be available later.</p>
-      </div>
-      <div>
-        <div class="task-reward">+$${formatMoney(CONFIG.TASK_REWARD)}</div>
-        <button class="task-btn soon" disabled>COMING SOON</button>
-      </div>`;
-    youtubeList.appendChild(item);
+      <div class="task-info"><h3>YouTube Task #${i}</h3><p>Video task will be available later.</p></div>
+      <div><div class="task-reward">+$${formatMoney(CONFIG.TASK_REWARD)}</div>
+      <button class="task-btn soon" disabled>COMING SOON</button></div>`;
+    youtube.appendChild(item);
   }
 }
 
 async function submitSocialTask(taskKey) {
   if (busy) return;
 
-  const task = SOCIAL_TASKS.find(item => item.key === taskKey);
+  const task = SOCIAL_TASKS.find(t => t.key === taskKey);
   if (!task) return toast('Task not found.');
 
   const status = account?.taskStatus?.[taskKey];
-
   if (status === 'pending' || status === 'approved') {
-    return toast('This task has already been submitted or approved.');
+    return toast('Task already submitted or approved.');
   }
 
-  if (tg?.openTelegramLink) {
-    tg.openTelegramLink(task.url);
-  } else {
-    window.open(task.url, '_blank', 'noopener');
-  }
+  if (tg?.openTelegramLink) tg.openTelegramLink(task.url);
+  else window.open(task.url,'_blank','noopener');
 
   toast('Join the channel, then return here.');
 
@@ -473,7 +430,7 @@ async function submitSocialTask(taskKey) {
 
     try {
       busy = true;
-      const result = await api('/tasks/submit', { taskKey });
+      const result = await api('/tasks/submit',{taskKey});
       toast(result.message || 'Submitted for admin verification.');
       await loadAccount();
     } catch (error) {
@@ -481,14 +438,14 @@ async function submitSocialTask(taskKey) {
     } finally {
       busy = false;
     }
-  }, 700);
+  },700);
 }
 
 function getAdsgramController() {
   if (adsgramController) return adsgramController;
 
   if (!window.Adsgram || typeof window.Adsgram.init !== 'function') {
-    throw new Error('AdsGram SDK did not load. Check your AdsGram setup.');
+    throw new Error('AdsGram SDK did not load. Refresh and try again.');
   }
 
   adsgramController = window.Adsgram.init({
@@ -497,41 +454,19 @@ function getAdsgramController() {
 
   if (!adsgramController || typeof adsgramController.show !== 'function') {
     adsgramController = null;
-    throw new Error('AdsGram block could not initialize. Check block ID 52783.');
+    throw new Error('AdsGram could not initialize. Check block ID 52783.');
   }
 
   return adsgramController;
 }
 
-async function waitForReward(adId) {
-  for (let attempt = 0; attempt < 8; attempt++) {
-    await new Promise(resolve =>
-      setTimeout(resolve, attempt === 0 ? 1500 : 2000)
-    );
-
-    try {
-      const status = await api('/adsgram/status', { adId });
-
-      if (status.verified) {
-        await loadAccount();
-        return true;
-      }
-    } catch (_) {
-      // Callback may still be processing.
-    }
-
-    try {
-      await loadAccount();
-
-      if (Number(account?.adsWatched || 0) > lastAdsCount) {
-        return true;
-      }
-    } catch (_) {}
-  }
-
-  return false;
-}
-
+/*
+ * AdsGram flow:
+ * 1. Create a pending attempt on the backend.
+ * 2. Show the ad.
+ * 3. Call /adsgram/claim after show() resolves.
+ * 4. Reload the balance from the backend.
+ */
 async function watchAd(adId) {
   if (busy) return;
 
@@ -542,46 +477,51 @@ async function watchAd(adId) {
   const button = document.getElementById('adBtn' + adId);
 
   try {
+    busy = true;
+
     if (button) {
       button.disabled = true;
       button.textContent = 'LOADING';
     }
 
-    // SDK must initialize before creating an attempt.
     const controller = getAdsgramController();
 
-    lastAdsCount = Number(account?.adsWatched || 0);
+    toast('Starting advertisement...');
 
-    // Correct backend endpoint: /adsgram/start
-    const start = await api('/adsgram/start', { adId });
+    const start = await api('/adsgram/start',{adId});
 
     if (start.result?.success === false) {
-      throw new Error(start.result.error || 'Ad attempt denied.');
+      throw new Error(start.result.reason || start.result.error || 'Ad attempt denied.');
     }
 
-    busy = true;
-    toast('Loading advertisement…');
+    let adResult;
 
     try {
-      await controller.show();
+      adResult = await controller.show();
     } catch (error) {
-      console.warn('AdsGram ad skipped or failed:', error);
-      toast('Ad was not completed. No reward credited.');
+      console.warn('AdsGram show error:',error);
+      toast('Ad was not completed. No reward was requested.');
       return;
     }
 
-    toast('Ad completed. Waiting for server verification…');
+    /*
+     * Some SDK versions return an object; others simply resolve.
+     * The backend claim endpoint must still enforce pending attempts.
+     */
+    toast('Ad finished. Requesting reward verification...');
 
-    const verified = await waitForReward(adId);
+    const claim = await api('/adsgram/claim',{adId});
 
-    if (verified) {
-      toast('Reward verified. Balance updated!');
-    } else {
-      toast('Verification pending. Check balance again shortly.');
+    if (claim.success !== true) {
+      throw new Error(claim.error || 'Reward was not credited.');
     }
+
+    await loadAccount();
+
+    toast('Reward processed. Balance: $' + formatMoney(account?.balance));
   } catch (error) {
-    console.error('watchAd:', error);
-    toast(error.message || 'Could not start advertisement.');
+    console.error('AdsGram reward error:',error);
+    toast(error.message || 'Could not process ad reward.');
   } finally {
     busy = false;
 
@@ -598,8 +538,8 @@ function copyReferral() {
 
   if (navigator.clipboard?.writeText) {
     navigator.clipboard.writeText(link)
-      .then(() => toast('Referral link copied!'))
-      .catch(() => fallbackCopy(link));
+      .then(()=>toast('Referral link copied!'))
+      .catch(()=>fallbackCopy(link));
   } else {
     fallbackCopy(link);
   }
@@ -627,27 +567,18 @@ function shareReferral() {
   const link = account?.referralLink;
   if (!link) return toast('Referral link is loading.');
 
-  const url = 'https://t.me/share/url?url=' +
-    encodeURIComponent(link) +
-    '&text=' +
-    encodeURIComponent('Join NX USDT!');
+  const url = 'https://t.me/share/url?url=' + encodeURIComponent(link) +
+    '&text=' + encodeURIComponent('Join NX USDT!');
 
-  if (tg?.openTelegramLink) {
-    tg.openTelegramLink(url);
-  } else {
-    window.open(url, '_blank', 'noopener');
-  }
+  if (tg?.openTelegramLink) tg.openTelegramLink(url);
+  else window.open(url,'_blank','noopener');
 }
 
 async function requestWithdrawal() {
   if (busy) return;
 
-  const amount = Number(
-    document.getElementById('withdrawAmount').value
-  );
-
-  const walletAddress = document
-    .getElementById('walletAddress').value.trim();
+  const amount = Number(document.getElementById('withdrawAmount').value);
+  const walletAddress = document.getElementById('walletAddress').value.trim();
 
   if (!Number.isFinite(amount) || amount < CONFIG.MIN_WITHDRAWAL) {
     return toast('Minimum withdrawal is 5 USDT.');
@@ -662,20 +593,15 @@ async function requestWithdrawal() {
   }
 
   if (!account.canWithdraw) {
-    return toast(
-      `Complete ${account.requiredAds} verified ads and get ${account.requiredTasks} Telegram tasks approved first.`
-    );
+    return toast(`Complete ${account.requiredAds} verified ads and get ${account.requiredTasks} Telegram tasks approved first.`);
   }
 
   try {
     busy = true;
 
-    const result = await api('/payout', {
-      amount,
-      walletAddress
-    });
+    const result = await api('/payout',{amount,walletAddress});
 
-    toast(result.message || 'Withdrawal request submitted. No automatic transfer was made.');
+    toast(result.message || 'Withdrawal request submitted. Transfer is not automatic.');
 
     await loadAccount();
     await loadPayoutHistory();
@@ -703,7 +629,6 @@ async function loadPayoutHistory() {
     payouts.forEach(payout => {
       const item = document.createElement('div');
       item.className = 'task';
-
       item.innerHTML = `
         <div class="task-icon">💸</div>
         <div class="task-info">
@@ -711,18 +636,16 @@ async function loadPayoutHistory() {
           <p>${safeText(payout.created_at || '')}</p>
         </div>
         <div class="task-reward">$${formatMoney(payout.amount_usdt)}</div>`;
-
       container.appendChild(item);
     });
   } catch (error) {
-    container.innerHTML =
-      `<p class="small-note">${safeText(error.message || 'Could not load payout history.')}</p>`;
+    container.innerHTML = `<p class="small-note">${safeText(error.message || 'Could not load payout history.')}</p>`;
   }
 }
 
 async function loadAccount() {
-  const result = await api('/sync', {
-    startParam: tg?.initDataUnsafe?.start_param || ''
+  const result = await api('/sync',{
+    startParam:tg?.initDataUnsafe?.start_param || ''
   });
 
   account = result;
@@ -768,7 +691,7 @@ async function initialize() {
   try {
     await loadAccount();
   } catch (error) {
-    console.error('Account load failed:', error);
+    console.error('Account load failed:',error);
     document.getElementById('welcome').textContent =
       'Could not load account. Reopen the Mini App.';
     toast(error.message || 'Could not load account.');
