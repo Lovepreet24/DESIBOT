@@ -115,6 +115,17 @@ button:disabled{opacity:.65;cursor:not-allowed}
   font-size:12px;text-align:center;display:none
 }
 .toast.show{display:block}
+.popup{
+  position:fixed;top:0;left:0;right:0;bottom:0;z-index:100;
+  display:flex;align-items:center;justify-content:center;
+  padding:24px;background:rgba(0,0,0,.65)
+}
+.popup-box{
+  width:100%;max-width:320px;background:var(--panel);
+  border:1px solid rgba(245,196,81,.3);border-radius:18px;
+  padding:22px 18px;text-align:center
+}
+.popup-box p{margin:0 0 18px;font-size:14px;line-height:1.6}
 .hidden{display:none!important}
 </style>
 </head>
@@ -179,9 +190,9 @@ button:disabled{opacity:.65;cursor:not-allowed}
 
   <div id="socialPanel" class="hidden">
     <div class="task-list" id="socialList"></div>
-    <div class="section-title"><h2>YouTube Tasks</h2><span>35s timer</span></div>
+    <div class="section-title"><h2>YouTube Tasks</h2></div>
     <div class="task-list" id="youtubeList"></div>
-    <p class="small-note">Telegram channel tasks are verified automatically. For YouTube tasks, press START, watch full video, then press VERIFY.</p>
+    <p class="small-note">For Telegram and YouTube tasks, press START, complete the task, then press VERIFY. YouTube tasks can be done again after 24 hours.</p>
   </div>
 </section>
 
@@ -233,6 +244,13 @@ button:disabled{opacity:.65;cursor:not-allowed}
 
 <div id="toast" class="toast"></div>
 
+<div id="popup" class="popup hidden">
+  <div class="popup-box">
+    <p id="popupText"></p>
+    <button class="btn btn-gold" style="width:100%" onclick="closePopup()">OK</button>
+  </div>
+</div>
+
 <script>
 'use strict';
 
@@ -247,7 +265,9 @@ const CONFIG = {
   TASK_REWARD: 0.25,
   YOUTUBE_TASKS: 4,
   MIN_WITHDRAWAL: 5,
-  AD_COOLDOWN_MS: 24 * 60 * 60 * 1000
+  AD_COOLDOWN_MS: 24 * 60 * 60 * 1000,
+  /* Ad slots where the "Go!" click is NOT required (watching the full ad is enough). */
+  NO_CLICK_ADS: [1]
 };
 
 const tg = window.Telegram?.WebApp;
@@ -306,6 +326,19 @@ function toast(message) {
   el.classList.add('show');
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => el.classList.remove('show'), 4000);
+}
+
+/* Centered popup: the user must press OK to close it. */
+function showPopup(message) {
+  document.getElementById('popupText').textContent = message;
+  document.getElementById('popup').classList.remove('hidden');
+  if (tg?.HapticFeedback) {
+    try { tg.HapticFeedback.notificationOccurred('warning'); } catch (_) {}
+  }
+}
+
+function closePopup() {
+  document.getElementById('popup').classList.add('hidden');
 }
 
 function goTo(page) {
@@ -433,11 +466,26 @@ function updateAllAdButtons() {
   }
 }
 
+/* Ticks task countdown buttons (YouTube 24h repeat). Re-renders when one expires. */
+function updateTaskCountdowns() {
+  let expired = false;
+
+  document.querySelectorAll('[data-until]').forEach(el => {
+    const remaining = Number(el.dataset.until) - Date.now();
+
+    if (remaining <= 0) expired = true;
+    else el.textContent = formatCountdown(remaining);
+  });
+
+  if (expired) renderYoutubeTasks();
+}
+
 function startCooldownTicker() {
   if (cooldownTimer) clearInterval(cooldownTimer);
 
   cooldownTimer = setInterval(() => {
     updateAllAdButtons();
+    updateTaskCountdowns();
   }, 1000);
 }
 
@@ -470,10 +518,10 @@ const SOCIAL_TASKS = [
 ];
 
 const YOUTUBE_TASKS = [
-  {key:'youtube_1',title:'YouTube Task #1',description:'Press START, watch full video, then VERIFY.',icon:'▶️',url:'https://youtu.be/Hja_iwEkfmI?si=1ECDIBTLzL73i1MX'},
-  {key:'youtube_2',title:'YouTube Task #2',description:'Press START, watch full video, then VERIFY.',icon:'▶️',url:'https://youtu.be/I5mLBbsuAdA?si=tHnGFainK9Y1cuGS'},
-  {key:'youtube_3',title:'YouTube Task #3',description:'Press START, watch full video, then VERIFY.',icon:'▶️',url:'https://youtu.be/_2cZcMyVW3M?si=0CYdWFEDp26j_TFL'},
-  {key:'youtube_4',title:'YouTube Task #4',description:'Press START, watch full video, then VERIFY.',icon:'▶️',url:'https://youtu.be/31N1t5Zk5RQ?si=LOLiFGr6_TniPAW8'}
+  {key:'youtube_1',title:'YouTube Task #1',description:'Press START, watch full video, then VERIFY.',icon:'▶️',url:'https://youtube.com/REPLACE_1'},
+  {key:'youtube_2',title:'YouTube Task #2',description:'Press START, watch full video, then VERIFY.',icon:'▶️',url:'https://youtube.com/REPLACE_2'},
+  {key:'youtube_3',title:'YouTube Task #3',description:'Press START, watch full video, then VERIFY.',icon:'▶️',url:'https://youtube.com/REPLACE_3'},
+  {key:'youtube_4',title:'YouTube Task #4',description:'Press START, watch full video, then VERIFY.',icon:'▶️',url:'https://youtube.com/REPLACE_4'}
 ];
 
 const ALL_TASKS = [...SOCIAL_TASKS, ...YOUTUBE_TASKS];
@@ -508,11 +556,115 @@ function renderTaskList(containerId, tasks) {
 }
 
 function renderSocialTasks() {
-  renderTaskList('socialList', SOCIAL_TASKS);
+  renderTelegramTasks();
   renderYoutubeTasks();
 }
 
-/* ---------- YouTube tasks: START -> wait 35s -> VERIFY ---------- */
+/* ---------- Telegram channel tasks: START -> VERIFY (no timer) ---------- */
+let tgState = {};
+let tgStorageKey = 'nxusdt_tg_tasks_v1';
+
+function loadTgState() {
+  try {
+    const userId = tg?.initDataUnsafe?.user?.id;
+    tgStorageKey = 'nxusdt_tg_tasks_v1_' + (userId || 'telegram');
+    tgState = JSON.parse(localStorage.getItem(tgStorageKey) || '{}');
+  } catch (_) {
+    tgState = {};
+  }
+}
+
+function saveTgState() {
+  try { localStorage.setItem(tgStorageKey, JSON.stringify(tgState)); } catch (_) {}
+}
+
+function resetTelegramTask(taskKey) {
+  delete tgState[taskKey];
+  saveTgState();
+  renderTelegramTasks();
+}
+
+function renderTelegramTasks() {
+  const list = document.getElementById('socialList');
+  list.innerHTML = '';
+
+  const autoVerify = account?.config?.autoVerifyTasks !== false;
+
+  SOCIAL_TASKS.forEach(task => {
+    const status = account?.taskStatus?.[task.key];
+    const started = Boolean(tgState[task.key]);
+    let buttons;
+
+    if (status === 'approved') {
+      buttons = `<button class="task-btn claimed" disabled>APPROVED</button>`;
+    } else if (status === 'pending' && !autoVerify) {
+      buttons = `<button class="task-btn pending" disabled>PENDING</button>`;
+    } else if (started) {
+      buttons = `<div class="task-btns">
+        <button class="task-btn start" disabled>START</button>
+        <button class="task-btn verify" onclick="verifyTelegramTask('${task.key}')">VERIFY</button>
+      </div>`;
+    } else {
+      buttons = `<button class="task-btn start" onclick="startTelegramTask('${task.key}')">START</button>`;
+    }
+
+    const item = document.createElement('div');
+    item.className = 'task';
+    item.innerHTML = `
+      <div class="task-icon">${task.icon}</div>
+      <div class="task-info">
+        <h3>${safeText(task.title)}</h3>
+        <p>${safeText(task.description)}</p>
+      </div>
+      <div>
+        <div class="task-reward">+$${formatMoney(CONFIG.TASK_REWARD)}</div>
+        ${buttons}
+      </div>`;
+    list.appendChild(item);
+  });
+}
+
+function startTelegramTask(taskKey) {
+  if (busy) return;
+
+  const task = SOCIAL_TASKS.find(t => t.key === taskKey);
+  if (!task) return toast('Task not found.');
+
+  if (task.url.startsWith('https://t.me') && tg?.openTelegramLink) tg.openTelegramLink(task.url);
+  else if (tg?.openLink) tg.openLink(task.url);
+  else window.open(task.url, '_blank', 'noopener');
+
+  tgState[taskKey] = { startedAt: Date.now() };
+  saveTgState();
+  renderTelegramTasks();
+
+  toast('Join the channel, then come back and press VERIFY.');
+}
+
+async function verifyTelegramTask(taskKey) {
+  if (busy) return;
+
+  if (!tgState[taskKey]) return renderTelegramTasks();
+
+  try {
+    busy = true;
+    const result = await api('/tasks/submit', { taskKey });
+
+    delete tgState[taskKey];
+    saveTgState();
+
+    toast(result.message || 'Task verified.');
+    await loadAccount();
+  } catch (error) {
+    resetTelegramTask(taskKey);
+    toast(error.message || 'Verification failed. Press START again.');
+  } finally {
+    busy = false;
+    updateAllAdButtons();
+  }
+}
+
+/* ---------- YouTube tasks: START -> wait 35s -> VERIFY (repeat after 24h) ---------- */
 const YT_WATCH_SECONDS = 35;
 let ytState = {};
 let ytStorageKey = 'nxusdt_yt_tasks_v1';
@@ -541,14 +693,27 @@ function renderYoutubeTasks() {
   const list = document.getElementById('youtubeList');
   list.innerHTML = '';
 
+  const autoApprove = account?.config?.youtubeAutoApprove !== false;
+
   YOUTUBE_TASKS.forEach(task => {
     const status = account?.taskStatus?.[task.key];
     const started = Boolean(ytState[task.key]);
+
+    /* Approved tasks show a 24h countdown, then become available again. */
+    const cooldown = account?.taskCooldowns?.[task.key];
+    const lockedUntil = cooldown
+      ? (account._loadedAt || Date.now()) + Number(cooldown.remainingSeconds || 0) * 1000
+      : 0;
+    const locked = status === 'approved' && lockedUntil > Date.now();
+    const available = status === 'approved' && cooldown && !locked;
+
     let buttons;
 
-    if (status === 'approved') {
+    if (locked) {
+      buttons = `<button class="task-btn cooldown" disabled data-until="${lockedUntil}">${formatCountdown(lockedUntil - Date.now())}</button>`;
+    } else if (status === 'approved' && !available) {
       buttons = `<button class="task-btn claimed" disabled>APPROVED</button>`;
-    } else if (status === 'pending') {
+    } else if (status === 'pending' && !autoApprove) {
       buttons = `<button class="task-btn pending" disabled>PENDING</button>`;
     } else if (started) {
       buttons = `<div class="task-btns">
@@ -593,7 +758,7 @@ async function startYoutubeTask(taskKey) {
     saveYtState();
     renderYoutubeTasks();
 
-    toast('Watch for at least ' + YT_WATCH_SECONDS + ' seconds, then press VERIFY.');
+    toast('Watch the full video, then press VERIFY.');
   } catch (error) {
     toast(error.message);
   } finally {
@@ -692,6 +857,12 @@ function getAdsgramController() {
 }
 let adClickDetected = false;
 
+/* Is the "Go!" click required for this ad slot? */
+function isClickRequired(adId) {
+  if (account?.config?.adClickRequired === false) return false;
+  return !CONFIG.NO_CLICK_ADS.includes(adId);
+}
+
 /* Detects the AdsGram "Click" tracking request fired when the user taps "Go!". */
 function interceptAdsgramClick() {
   adClickDetected = false;
@@ -768,28 +939,42 @@ async function watchAd(adId) {
       throw new Error(start.error || 'Ad attempt denied.');
     }
 
-    /* Watch for the "Go!" click while the ad is on screen. */
-    const stopIntercept = interceptAdsgramClick();
+    const clickRequired = isClickRequired(adId);
+
+    /* Watch for the "Go!" click while the ad is on screen (only on click-required slots). */
+    const stopIntercept = clickRequired ? interceptAdsgramClick() : () => {};
+    let adDone = false;
 
     try {
-      await controller.show();
+      const shown = await controller.show();
+      /* Resolved = the ad was watched. Skipped/closed ads reject. */
+      adDone = !(shown && shown.done === false);
     } catch (error) {
       console.warn('AdsGram show error:', error);
-      /* Skipped/closed ads reject; the click check below still decides the reward. */
     } finally {
       stopIntercept();
     }
 
-        if (!adClickDetected) {
+    const earned = clickRequired ? adClickDetected : adDone;
+
+    if (!earned) {
       try { await api('/adsgram/cancel'); } catch (_) {}
-      if (statusText) statusText.textContent = 'Tap "Go!" on the ad to earn the reward.';
-      toast('You must click the "Go!" button on the ad to receive the reward.');
+
+      if (clickRequired) {
+        if (statusText) statusText.textContent = 'Tap "Go!" on the ad to earn the reward.';
+        showPopup('You must click the "Go!" button on the ad to receive the reward.');
+      } else {
+        if (statusText) statusText.textContent = 'Watch the full ad to earn the reward.';
+        showPopup('Please watch the full ad to receive the reward.');
+      }
       return;
     }
 
-    toast('Ad clicked. Requesting reward verification...');
+    toast(clickRequired
+      ? 'Ad clicked. Requesting reward verification...'
+      : 'Ad completed. Requesting reward verification...');
 
-    const claim = await api('/adsgram/claim', { adId, clicked: true });
+    const claim = await api('/adsgram/claim', { adId, clicked: clickRequired });
 
     if (claim.success !== true) {
       throw new Error(claim.error || 'Reward was not credited.');
@@ -936,6 +1121,7 @@ async function loadAccount() {
   });
 
   account = result;
+  account._loadedAt = Date.now();
 
   document.getElementById('welcome').textContent =
     'Welcome, ' + (result.user?.first_name || 'User') + '!';
@@ -968,6 +1154,7 @@ async function loadAccount() {
 async function initialize() {
   setCooldownStorageKey();
   loadYtState();
+  loadTgState();
   loadLocalCooldowns();
   renderAds();
   renderSocialTasks();
