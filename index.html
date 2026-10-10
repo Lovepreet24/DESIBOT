@@ -633,4 +633,199 @@ async function watchAd(adId) {
      */
     startAdCooldown(adId, Date.now());
 
-    if (status
+    if (statusText) statusText.textContent = 'Completed. Available again in 24 hours.';
+
+    await loadAccount();
+
+    toast('Reward processed. Balance: $' + formatMoney(account?.balance));
+  } catch (error) {
+    console.error('AdsGram reward error:',error);
+    if (statusText) statusText.textContent = 'Available status will refresh on retry.';
+    toast(error.message || 'Could not process ad reward.');
+  } finally {
+    busy = false;
+    updateAllAdButtons();
+
+    if (button && !getRemainingMs(adId)) {
+      button.disabled = false;
+      button.className = 'task-btn start';
+      button.textContent = 'WATCH';
+    }
+  }
+}
+
+function copyReferral() {
+  const link = account?.referralLink;
+  if (!link) return toast('Referral link is loading.');
+
+  if (navigator.clipboard?.writeText) {
+    navigator.clipboard.writeText(link)
+      .then(()=>toast('Referral link copied!'))
+      .catch(()=>fallbackCopy(link));
+  } else {
+    fallbackCopy(link);
+  }
+}
+
+function fallbackCopy(value) {
+  const input = document.createElement('textarea');
+  input.value = value;
+  input.style.position = 'fixed';
+  input.style.opacity = '0';
+  document.body.appendChild(input);
+  input.select();
+
+  try {
+    document.execCommand('copy');
+    toast('Referral link copied!');
+  } catch (_) {
+    toast('Copy failed. Copy the link manually.');
+  }
+
+  input.remove();
+}
+
+function shareReferral() {
+  const link = account?.referralLink;
+  if (!link) return toast('Referral link is loading.');
+
+  const url = 'https://t.me/share/url?url=' + encodeURIComponent(link) +
+    '&text=' + encodeURIComponent('Join NX USDT!');
+
+  if (tg?.openTelegramLink) tg.openTelegramLink(url);
+  else window.open(url,'_blank','noopener');
+}
+
+async function requestWithdrawal() {
+  if (busy) return;
+
+  const amount = Number(document.getElementById('withdrawAmount').value);
+  const walletAddress = document.getElementById('walletAddress').value.trim();
+
+  if (!Number.isFinite(amount) || amount < CONFIG.MIN_WITHDRAWAL) {
+    return toast('Minimum withdrawal is 5 USDT.');
+  }
+
+  if (!/^0x[a-fA-F0-9]{40}$/.test(walletAddress)) {
+    return toast('Enter a valid BNB Smart Chain wallet address.');
+  }
+
+  if (!account || amount > Number(account.balance || 0)) {
+    return toast('Insufficient account balance.');
+  }
+
+  if (!account.canWithdraw) {
+    return toast(`Complete ${account.requiredAds} verified ads and get ${account.requiredTasks} Telegram tasks approved first.`);
+  }
+
+  try {
+    busy = true;
+
+    const result = await api('/payout',{amount,walletAddress});
+
+    toast(result.message || 'Withdrawal request submitted. Transfer is not automatic.');
+
+    await loadAccount();
+    await loadPayoutHistory();
+  } catch (error) {
+    toast(error.message);
+  } finally {
+    busy = false;
+    updateAllAdButtons();
+  }
+}
+
+async function loadPayoutHistory() {
+  const container = document.getElementById('payoutHistory');
+
+  try {
+    const result = await api('/payouts');
+    const payouts = result.payouts || [];
+
+    if (!payouts.length) {
+      container.innerHTML = '<p class="small-note">No withdrawals yet.</p>';
+      return;
+    }
+
+    container.innerHTML = '';
+
+    payouts.forEach(payout => {
+      const item = document.createElement('div');
+      item.className = 'task';
+      item.innerHTML = `
+        <div class="task-icon">💸</div>
+        <div class="task-info">
+          <h3>${safeText(payout.status || 'pending')}</h3>
+          <p>${safeText(payout.created_at || '')}</p>
+        </div>
+        <div class="task-reward">$${formatMoney(payout.amount_usdt)}</div>`;
+      container.appendChild(item);
+    });
+  } catch (error) {
+    container.innerHTML = `<p class="small-note">${safeText(error.message || 'Could not load payout history.')}</p>`;
+  }
+}
+
+async function loadAccount() {
+  const result = await api('/sync',{
+    startParam:tg?.initDataUnsafe?.start_param || ''
+  });
+
+  account = result;
+
+  document.getElementById('welcome').textContent =
+    'Welcome, ' + (result.user?.first_name || 'User') + '!';
+
+  document.getElementById('balance').textContent =
+    formatMoney(result.balance);
+
+  document.getElementById('withdrawBalance').textContent =
+    formatMoney(result.balance);
+
+  document.getElementById('adsCount').textContent =
+    `${result.adsWatched || 0}/${CONFIG.MAX_ADS}`;
+
+  document.getElementById('refCount').textContent =
+    result.referrals || 0;
+
+  document.getElementById('referralCountLarge').textContent =
+    result.referrals || 0;
+
+  document.getElementById('taskCount').textContent =
+    `${result.tasksCompleted || 0}/${result.requiredTasks || 2}`;
+
+  document.getElementById('referralLink').textContent =
+    result.referralLink || 'Referral link unavailable';
+
+  renderSocialTasks();
+  updateAllAdButtons();
+}
+
+async function initialize() {
+  setCooldownStorageKey();
+  loadLocalCooldowns();
+  renderAds();
+  renderSocialTasks();
+  startCooldownTicker();
+
+  if (!tg?.initData) {
+    document.getElementById('welcome').textContent =
+      'Open this Mini App through Telegram to sign in.';
+    toast('Telegram authentication is required.');
+    return;
+  }
+
+  try {
+    await loadAccount();
+  } catch (error) {
+    console.error('Account load failed:',error);
+    document.getElementById('welcome').textContent =
+      'Could not load account. Reopen the Mini App.';
+    toast(error.message || 'Could not load account.');
+  }
+}
+
+initialize();
+</script>
+</body>
+</html>
