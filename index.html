@@ -1,1379 +1,781 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-  <meta name="theme-color" content="#080d1a">
-
-  <title>NX USDT</title>
-
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-
-  <style>
-    :root {
-      --bg: #080d1a;
-      --panel: #111a2d;
-      --panel2: #162139;
-      --gold: #f5c451;
-      --gold2: #ffe29a;
-      --text: #ffffff;
-      --muted: #98a5bd;
-      --green: #3ddc97;
-      --border: rgba(255,255,255,.08);
-    }
-
-    * {
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    body {
-      margin: 0;
-      background: radial-gradient(ellipse at top, rgba(245,196,81,.09), transparent 55%), var(--bg);
-      color: var(--text);
-      font-family: Arial, Helvetica, sans-serif;
-      padding-bottom: 95px;
-    }
-
-    button, input {
-      font: inherit;
-    }
-
-    button {
-      cursor: pointer;
-    }
-
-    button:disabled {
-      cursor: not-allowed;
-      opacity: .55;
-    }
-
-    .app {
-      max-width: 520px;
-      margin: auto;
-      padding: 18px 15px;
-    }
-
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 11px;
-    }
-
-    .logo {
-      height: 45px;
-      width: 45px;
-      display: grid;
-      place-items: center;
-      border-radius: 15px;
-      background: linear-gradient(135deg, #ffe39b, #d49b24);
-      color: #111827;
-      font-weight: 900;
-      font-size: 19px;
-    }
-
-    .brand h1 {
-      font-size: 21px;
-      margin: 0;
-    }
-
-    .brand p {
-      font-size: 11px;
-      color: var(--muted);
-      margin: 5px 0 0;
-    }
-
-    .status {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      color: var(--green);
-      font-size: 11px;
-      background: rgba(61,220,151,.08);
-      padding: 8px 10px;
-      border-radius: 20px;
-    }
-
-    .dot {
-      height: 6px;
-      width: 6px;
-      background: var(--green);
-      border-radius: 50%;
-    }
-
-    .welcome {
-      font-size: 14px;
-      color: var(--muted);
-      margin: 10px 0 15px;
-    }
-
-    .balance-card {
-      background: linear-gradient(135deg, rgba(245,196,81,.17), rgba(17,26,45,.98) 58%);
-      border: 1px solid rgba(245,196,81,.3);
-      border-radius: 23px;
-      padding: 22px 20px;
-      margin-bottom: 16px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .balance-label {
-      color: #d5dced;
-      font-size: 13px;
-    }
-
-    .balance {
-      font-size: 37px;
-      font-weight: 900;
-      margin: 12px 0 7px;
-      overflow-wrap: anywhere;
-    }
-
-    .balance span {
-      color: var(--gold);
-      font-size: 18px;
-    }
-
-    .chain-label {
-      color: var(--muted);
-      font-size: 11px;
-    }
-
-    .balance-actions {
-      display: flex;
-      gap: 10px;
-      margin-top: 21px;
-    }
-
-    .btn {
-      border: 0;
-      border-radius: 12px;
-      padding: 12px 14px;
-      font-weight: 800;
-      font-size: 13px;
-      flex: 1;
-    }
-
-    .btn-gold {
-      background: linear-gradient(135deg, var(--gold2), #e8b536);
-      color: #171717;
-    }
-
-    .btn-dark {
-      color: var(--gold);
-      background: rgba(245,196,81,.08);
-      border: 1px solid rgba(245,196,81,.25);
-    }
-
-    .section-title {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin: 24px 0 12px;
-      gap: 10px;
-    }
-
-    .section-title h2 {
-      font-size: 18px;
-      margin: 0;
-    }
-
-    .section-title span {
-      font-size: 11px;
-      color: var(--muted);
-    }
-
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 9px;
-    }
-
-    .stat {
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: 15px;
-      padding: 14px 9px;
-      min-width: 0;
-    }
-
-    .stat-icon {
-      font-size: 19px;
-      margin-bottom: 10px;
-    }
-
-    .stat-value {
-      font-weight: 900;
-      font-size: 18px;
-      overflow-wrap: anywhere;
-    }
-
-    .stat-label {
-      font-size: 10px;
-      color: var(--muted);
-      margin-top: 5px;
-    }
-
-    .reward-banner {
-      background: linear-gradient(110deg, #25213a, #182039);
-      border: 1px solid rgba(245,196,81,.15);
-      border-radius: 17px;
-      padding: 15px;
-      margin-top: 17px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-    }
-
-    .reward-banner h3 {
-      font-size: 14px;
-      margin: 0 0 6px;
-    }
-
-    .reward-banner p {
-      font-size: 11px;
-      color: var(--muted);
-      margin: 0;
-      line-height: 1.5;
-    }
-
-    .reward-amount {
-      font-size: 22px;
-      font-weight: 900;
-      color: var(--gold);
-      white-space: nowrap;
-    }
-
-    .tabs {
-      display: flex;
-      gap: 8px;
-      padding: 5px;
-      background: #0e1526;
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      margin: 17px 0;
-    }
-
-    .tab {
-      flex: 1;
-      border: 0;
-      background: transparent;
-      color: var(--muted);
-      padding: 12px 5px;
-      font-weight: 800;
-      font-size: 12px;
-      border-radius: 10px;
-    }
-
-    .tab.active {
-      background: linear-gradient(135deg, #ffe39b, #e6b237);
-      color: #151515;
-    }
-
-    .task-list {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .task {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 14px;
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-    }
-
-    .task-icon {
-      flex-shrink: 0;
-      height: 43px;
-      width: 43px;
-      border-radius: 13px;
-      display: grid;
-      place-items: center;
-      background: var(--panel2);
-      font-size: 21px;
-    }
-
-    .task-info {
-      flex: 1;
-      min-width: 0;
-    }
-
-    .task-info h3 {
-      font-size: 13px;
-      margin: 0 0 6px;
-    }
-
-    .task-info p {
-      font-size: 11px;
-      color: var(--muted);
-      margin: 0;
-      line-height: 1.45;
-    }
-
-    .task-reward {
-      font-size: 12px;
-      font-weight: 900;
-      color: var(--gold);
-      margin-bottom: 8px;
-      text-align: right;
-      white-space: nowrap;
-    }
-
-    .task-btn {
-      border: 0;
-      border-radius: 8px;
-      padding: 9px 10px;
-      font-size: 10px;
-      font-weight: 900;
-      min-width: 83px;
-    }
-
-    .task-btn.start {
-      background: var(--gold);
-      color: #151515;
-    }
-
-    .task-btn.pending {
-      background: #5a4925;
-      color: #ffe39b;
-    }
-
-    .task-btn.claimed {
-      background: rgba(61,220,151,.13);
-      color: var(--green);
-    }
-
-    .task-btn.soon {
-      background: #242d40;
-      color: #aab5c8;
-    }
-
-    .small-note {
-      font-size: 11px;
-      line-height: 1.6;
-      color: var(--muted);
-      margin: 12px 2px;
-    }
-
-    .panel {
-      display: none;
-    }
-
-    .panel.active {
-      display: block;
-    }
-
-    .ref-card, .withdraw-card {
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: 19px;
-      padding: 18px;
-      margin-top: 15px;
-    }
-
-    .ref-card h3, .withdraw-card h3 {
-      margin: 0 0 8px;
-      font-size: 16px;
-    }
-
-    .ref-card p, .withdraw-card p {
-      color: var(--muted);
-      font-size: 12px;
-      line-height: 1.6;
-    }
-
-    .ref-url {
-      word-break: break-all;
-      background: #0a1120;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 12px;
-      font-size: 11px;
-      line-height: 1.5;
-      margin: 14px 0;
-    }
-
-    .input {
-      width: 100%;
-      background: #0a1120;
-      color: white;
-      border: 1px solid #293650;
-      padding: 13px;
-      border-radius: 11px;
-      outline: none;
-      margin: 8px 0;
-      font-size: 13px;
-    }
-
-    .input:focus {
-      border-color: var(--gold);
-    }
-
-    .bottom-nav {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      z-index: 20;
-      display: flex;
-      justify-content: center;
-      background: rgba(8,13,26,.97);
-      backdrop-filter: blur(16px);
-      border-top: 1px solid var(--border);
-      padding: 10px 6px calc(10px + env(safe-area-inset-bottom));
-    }
-
-    .nav-inner {
-      width: 100%;
-      max-width: 520px;
-      display: flex;
-      justify-content: space-around;
-    }
-
-    .nav-btn {
-      flex: 1;
-      border: 0;
-      background: transparent;
-      color: var(--muted);
-      font-size: 10px;
-      font-weight: 700;
-      padding: 6px 2px;
-    }
-
-    .nav-icon {
-      display: block;
-      font-size: 20px;
-      margin-bottom: 5px;
-    }
-
-    .nav-btn.active {
-      color: var(--gold);
-    }
-
-    .toast {
-      position: fixed;
-      left: 15px;
-      right: 15px;
-      bottom: 90px;
-      z-index: 50;
-      background: #202b41;
-      color: white;
-      padding: 14px;
-      border-radius: 12px;
-      font-size: 12px;
-      text-align: center;
-      display: none;
-    }
-
-    .toast.show {
-      display: block;
-    }
-
-    .hidden {
-      display: none !important;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#080d1a">
+<title>NX USDT</title>
+
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="https://sad.adsgram.ai/js/sad.min.js"></script>
+
+<style>
+:root {
+  --bg:#080d1a;
+  --panel:#111a2d;
+  --panel2:#162139;
+  --gold:#f5c451;
+  --gold2:#ffe29a;
+  --text:#fff;
+  --muted:#98a5bd;
+  --green:#3ddc97;
+  --border:rgba(255,255,255,.08);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{
+  margin:0;
+  background:radial-gradient(ellipse at top,rgba(245,196,81,.09),transparent 55%),var(--bg);
+  color:var(--text);
+  font-family:Arial,Helvetica,sans-serif;
+  padding-bottom:95px
+}
+button,input{font:inherit}
+button{cursor:pointer}
+button:disabled{opacity:.55;cursor:not-allowed}
+.app{max-width:520px;margin:auto;padding:18px 15px}
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.brand{display:flex;align-items:center;gap:11px}
+.logo{
+  height:45px;width:45px;display:grid;place-items:center;
+  border-radius:15px;background:linear-gradient(135deg,#ffe39b,#d49b24);
+  color:#111827;font-weight:900;font-size:19px
+}
+.brand h1{font-size:21px;margin:0}
+.brand p{font-size:11px;color:var(--muted);margin:5px 0 0}
+.status{display:flex;align-items:center;gap:5px;color:var(--green);font-size:11px;background:rgba(61,220,151,.08);padding:8px 10px;border-radius:20px}
+.dot{height:6px;width:6px;background:var(--green);border-radius:50%}
+.welcome{font-size:14px;color:var(--muted);margin:10px 0 15px}
+.balance-card{
+  background:linear-gradient(135deg,rgba(245,196,81,.17),rgba(17,26,45,.98) 58%);
+  border:1px solid rgba(245,196,81,.3);border-radius:23px;
+  padding:22px 20px;margin-bottom:16px
+}
+.balance-label{color:#d5dced;font-size:13px}
+.balance{font-size:37px;font-weight:900;margin:12px 0 7px;overflow-wrap:anywhere}
+.balance span{color:var(--gold);font-size:18px}
+.chain-label{color:var(--muted);font-size:11px}
+.balance-actions{display:flex;gap:10px;margin-top:21px}
+.btn{border:0;border-radius:12px;padding:12px 14px;font-weight:800;font-size:13px;flex:1}
+.btn-gold{background:linear-gradient(135deg,var(--gold2),#e8b536);color:#171717}
+.btn-dark{color:var(--gold);background:rgba(245,196,81,.08);border:1px solid rgba(245,196,81,.25)}
+.section-title{display:flex;align-items:center;justify-content:space-between;margin:24px 0 12px;gap:10px}
+.section-title h2{font-size:18px;margin:0}
+.section-title span{font-size:11px;color:var(--muted)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.stat{background:var(--panel);border:1px solid var(--border);border-radius:15px;padding:14px 9px;min-width:0}
+.stat-icon{font-size:19px;margin-bottom:10px}
+.stat-value{font-weight:900;font-size:18px;overflow-wrap:anywhere}
+.stat-label{font-size:10px;color:var(--muted);margin-top:5px}
+.reward-banner{
+  background:linear-gradient(110deg,#25213a,#182039);
+  border:1px solid rgba(245,196,81,.15);border-radius:17px;padding:15px;
+  margin-top:17px;display:flex;align-items:center;justify-content:space-between;gap:12px
+}
+.reward-banner h3{font-size:14px;margin:0 0 6px}
+.reward-banner p{font-size:11px;color:var(--muted);margin:0;line-height:1.5}
+.reward-amount{font-size:22px;font-weight:900;color:var(--gold);white-space:nowrap}
+.tabs{display:flex;gap:8px;padding:5px;background:#0e1526;border:1px solid var(--border);border-radius:14px;margin:17px 0}
+.tab{flex:1;border:0;background:transparent;color:var(--muted);padding:12px 5px;font-weight:800;font-size:12px;border-radius:10px}
+.tab.active{background:linear-gradient(135deg,#ffe39b,#e6b237);color:#151515}
+.task-list{display:flex;flex-direction:column;gap:10px}
+.task{display:flex;align-items:center;gap:12px;padding:14px;background:var(--panel);border:1px solid var(--border);border-radius:16px}
+.task-icon{flex-shrink:0;height:43px;width:43px;border-radius:13px;display:grid;place-items:center;background:var(--panel2);font-size:21px}
+.task-info{flex:1;min-width:0}
+.task-info h3{font-size:13px;margin:0 0 6px}
+.task-info p{font-size:11px;color:var(--muted);margin:0;line-height:1.45}
+.task-reward{font-size:12px;font-weight:900;color:var(--gold);margin-bottom:8px;text-align:right;white-space:nowrap}
+.task-btn{border:0;border-radius:8px;padding:9px 10px;font-size:10px;font-weight:900;min-width:83px}
+.task-btn.start{background:var(--gold);color:#151515}
+.task-btn.pending{background:#5a4925;color:#ffe39b}
+.task-btn.claimed{background:rgba(61,220,151,.13);color:var(--green)}
+.task-btn.soon{background:#242d40;color:#aab5c8}
+.small-note{font-size:11px;line-height:1.6;color:var(--muted);margin:12px 2px}
+.panel{display:none}
+.panel.active{display:block}
+.ref-card,.withdraw-card{background:var(--panel);border:1px solid var(--border);border-radius:19px;padding:18px;margin-top:15px}
+.ref-card h3,.withdraw-card h3{margin:0 0 8px;font-size:16px}
+.ref-card p,.withdraw-card p{color:var(--muted);font-size:12px;line-height:1.6}
+.ref-url{word-break:break-all;background:#0a1120;border:1px solid var(--border);border-radius:10px;padding:12px;font-size:11px;line-height:1.5;margin:14px 0}
+.input{width:100%;background:#0a1120;color:white;border:1px solid #293650;padding:13px;border-radius:11px;outline:none;margin:8px 0;font-size:13px}
+.input:focus{border-color:var(--gold)}
+.bottom-nav{
+  position:fixed;bottom:0;left:0;right:0;z-index:20;
+  display:flex;justify-content:center;background:rgba(8,13,26,.97);
+  backdrop-filter:blur(16px);border-top:1px solid var(--border);
+  padding:10px 6px calc(10px + env(safe-area-inset-bottom))
+}
+.nav-inner{width:100%;max-width:520px;display:flex;justify-content:space-around}
+.nav-btn{flex:1;border:0;background:transparent;color:var(--muted);font-size:10px;font-weight:700;padding:6px 2px}
+.nav-icon{display:block;font-size:20px;margin-bottom:5px}
+.nav-btn.active{color:var(--gold)}
+.toast{
+  position:fixed;left:15px;right:15px;bottom:90px;z-index:50;
+  background:#202b41;color:white;padding:14px;border-radius:12px;
+  font-size:12px;text-align:center;display:none
+}
+.toast.show{display:block}
+.hidden{display:none!important}
+</style>
 </head>
 
 <body>
-  <main class="app">
-
-    <header class="header">
-      <div class="brand">
-        <div class="logo">NX</div>
-        <div>
-          <h1>NX <span style="color:var(--gold)">USDT</span></h1>
-          <p>Watch • Complete • Earn</p>
-        </div>
-      </div>
-
-      <div class="status">
-        <span class="dot"></span>
-        Mini App
-      </div>
-    </header>
-
-    <p class="welcome" id="welcome">Welcome to NX USDT</p>
-
-    <!-- HOME PAGE -->
-
-    <section id="homePanel" class="panel active">
-
-      <div class="balance-card">
-        <div class="balance-label">Available Balance</div>
-
-        <div class="balance">
-          $<span id="balance">0.00</span>
-        </div>
-
-        <div class="chain-label">
-          USDT • BNB Smart Chain (BEP-20)
-        </div>
-
-        <div class="balance-actions">
-          <button class="btn btn-gold" onclick="goTo('withdraw')">
-            Withdraw
-          </button>
-
-          <button class="btn btn-dark" onclick="goTo('refer')">
-            Refer & Earn
-          </button>
-        </div>
-      </div>
-
-      <div class="stats">
-        <div class="stat">
-          <div class="stat-icon">📺</div>
-          <div class="stat-value" id="adsCount">0/12</div>
-          <div class="stat-label">Ads Today</div>
-        </div>
-
-        <div class="stat">
-          <div class="stat-icon">👥</div>
-          <div class="stat-value" id="refCount">0</div>
-          <div class="stat-label">Referrals</div>
-        </div>
-
-        <div class="stat">
-          <div class="stat-icon">📋</div>
-          <div class="stat-value" id="taskCount">0/2</div>
-          <div class="stat-label">Tasks Approved</div>
-        </div>
-      </div>
-
-      <div class="reward-banner">
-        <div>
-          <h3>🎁 Welcome Bonus</h3>
-          <p>New account bonus, credited once.</p>
-        </div>
-        <div class="reward-amount">$10</div>
-      </div>
-
-      <div class="section-title">
-        <h2>Start Earning</h2>
-        <span>Earn USDT</span>
-      </div>
-
-      <div class="ref-card">
-        <h3>📺 Watch Ads & Complete Tasks</h3>
-        <p>
-          Earn through available ads and social tasks.
-          Check your eligibility and task status on the Earn page.
-        </p>
-
-        <button class="btn btn-gold" style="width:100%;margin-top:10px"
-          onclick="goTo('earn')">
-          Go to Earn →
-        </button>
-      </div>
-
-    </section>
-
-    <!-- EARN PAGE -->
-
-    <section id="earnPanel" class="panel">
-
-      <div class="section-title">
-        <h2>Earn USDT</h2>
-        <span>Choose a method</span>
-      </div>
-
-      <div class="tabs">
-        <button class="tab active" id="watchTab"
-          onclick="switchEarnTab('ads')">
-          📺 Watch Ads
-        </button>
-
-        <button class="tab" id="socialTab"
-          onclick="switchEarnTab('social')">
-          📋 Social Tasks
-        </button>
-      </div>
-
-      <div id="adsPanel">
-        <div class="task-list" id="adsList"></div>
-
-        <p class="small-note">
-          Each ad reward: $0.25 USDT. Maximum 12 ads per rolling
-          24 hours. Rewards require genuine ad-completion verification.
-        </p>
-      </div>
-
-      <div id="socialPanel" class="hidden">
-        <div class="task-list" id="socialList"></div>
-
-        <div class="section-title">
-          <h2>YouTube Tasks</h2>
-          <span>Coming soon</span>
-        </div>
-
-        <div class="task-list" id="youtubeList"></div>
-
-        <p class="small-note">
-          Telegram tasks require admin verification.
-          YouTube tasks are not active yet.
-        </p>
-      </div>
-
-    </section>
-
-    <!-- REFER PAGE -->
-
-    <section id="referPanel" class="panel">
-
-      <div class="section-title">
-        <h2>Refer & Earn</h2>
-        <span>Invite friends</span>
-      </div>
-
-      <div class="ref-card">
-        <h3>💰 Earn $5 USDT per referral</h3>
-
-        <p>
-          Share your personal invitation link.
-          The referral reward is credited once for an eligible
-          new registration.
-        </p>
-
-        <div class="reward-banner">
-          <div>
-            <h3>Your Referrals</h3>
-            <p>Successful registrations</p>
-          </div>
-
-          <div class="reward-amount" id="referralCountLarge">0</div>
-        </div>
-
-        <div class="ref-url" id="referralLink">
-          Loading referral link...
-        </div>
-
-        <button class="btn btn-gold" style="width:100%"
-          onclick="copyReferral()">
-          Copy Referral Link
-        </button>
-
-        <button class="btn btn-dark"
-          style="width:100%;margin-top:10px"
-          onclick="shareReferral()">
-          Share with Friends
-        </button>
-      </div>
-
-    </section>
-
-    <!-- WITHDRAW PAGE -->
-
-    <section id="withdrawPanel" class="panel">
-
-      <div class="section-title">
-        <h2>Withdraw USDT</h2>
-        <span>BEP-20</span>
-      </div>
-
-      <div class="withdraw-card">
-        <h3>💸 Request Withdrawal</h3>
-
-        <p>
-          Minimum withdrawal: $5 USDT. Complete the required
-          ads and approved Telegram tasks before requesting.
-        </p>
-
-        <div class="reward-banner">
-          <div>
-            <h3>Available Balance</h3>
-            <p>NX USDT account balance</p>
-          </div>
-
-          <div class="reward-amount">
-            $<span id="withdrawBalance">0.00</span>
-          </div>
-        </div>
-
-        <label for="withdrawAmount" class="small-note">
-          Amount (USDT)
-        </label>
-
-        <input
-          class="input"
-          id="withdrawAmount"
-          type="number"
-          min="5"
-          step="0.01"
-          placeholder="Minimum 5 USDT"
-        >
-
-        <label for="walletAddress" class="small-note">
-          BNB Smart Chain wallet address
-        </label>
-
-        <input
-          class="input"
-          id="walletAddress"
-          type="text"
-          placeholder="0x..."
-          autocomplete="off"
-        >
-
-        <button class="btn btn-gold"
-          style="width:100%;margin-top:12px"
-          onclick="requestWithdrawal()">
-          Request Withdrawal
-        </button>
-
-        <p class="small-note">
-          Automatic payouts are not activated until the
-          backend payment system is securely configured.
-        </p>
-      </div>
-
-      <div class="section-title">
-        <h2>Withdrawal History</h2>
-      </div>
-
-      <div id="payoutHistory" class="task-list">
-        <p class="small-note">No history loaded.</p>
-      </div>
-
-    </section>
-
-  </main>
-
-  <!-- FOUR-BUTTON NAVIGATION -->
-
-  <nav class="bottom-nav">
-    <div class="nav-inner">
-
-      <button class="nav-btn active" data-page="home"
-        onclick="goTo('home')">
-        <span class="nav-icon">🏠</span>
-        Home
-      </button>
-
-      <button class="nav-btn" data-page="earn"
-        onclick="goTo('earn')">
-        <span class="nav-icon">💰</span>
-        Earn
-      </button>
-
-      <button class="nav-btn" data-page="refer"
-        onclick="goTo('refer')">
-        <span class="nav-icon">👥</span>
-        Refer
-      </button>
-
-      <button class="nav-btn" data-page="withdraw"
-        onclick="goTo('withdraw')">
-        <span class="nav-icon">💸</span>
-        Withdraw
-      </button>
-
+<main class="app">
+
+<header class="header">
+  <div class="brand">
+    <div class="logo">NX</div>
+    <div>
+      <h1>NX <span style="color:var(--gold)">USDT</span></h1>
+      <p>Watch • Complete • Earn</p>
     </div>
-  </nav>
+  </div>
+  <div class="status"><span class="dot"></span>Mini App</div>
+</header>
 
-  <div id="toast" class="toast"></div>
+<p class="welcome" id="welcome">Welcome to NX USDT</p>
 
-  <script>
-    'use strict';
+<section id="homePanel" class="panel active">
+  <div class="balance-card">
+    <div class="balance-label">Available Balance</div>
+    <div class="balance">$<span id="balance">0.00</span></div>
+    <div class="chain-label">USDT • BNB Smart Chain (BEP-20)</div>
+    <div class="balance-actions">
+      <button class="btn btn-gold" onclick="goTo('withdraw')">Withdraw</button>
+      <button class="btn btn-dark" onclick="goTo('refer')">Refer &amp; Earn</button>
+    </div>
+  </div>
 
-    // ==========================================
-    // CONFIGURATION
-    // ==========================================
+  <div class="stats">
+    <div class="stat"><div class="stat-icon">📺</div><div class="stat-value" id="adsCount">0/12</div><div class="stat-label">Ads Today</div></div>
+    <div class="stat"><div class="stat-icon">👥</div><div class="stat-value" id="refCount">0</div><div class="stat-label">Referrals</div></div>
+    <div class="stat"><div class="stat-icon">📋</div><div class="stat-value" id="taskCount">0/2</div><div class="stat-label">Tasks Approved</div></div>
+  </div>
 
-    const CONFIG = {
-      API_BASE: 'https://nx-usdt-production.up.railway.app',
-      BOT_USERNAME: 'NXCoinRobot',
-      ADSGRAM_BLOCK_ID: '52783',
-      MAIN_CHANNEL: 'https://t.me/NXUSDTEarn',
-      PAYOUT_CHANNEL: 'https://t.me/NXUSDTPayout',
-      AD_REWARD: 0.25,
-      MAX_ADS: 12,
-      TASK_REWARD: 0.25,
-      YOUTUBE_TASKS: 4,
-      MIN_WITHDRAWAL: 5
-    };
+  <div class="reward-banner">
+    <div><h3>🎁 Welcome Bonus</h3><p>New account bonus, credited once.</p></div>
+    <div class="reward-amount">$10</div>
+  </div>
 
-    const tg = window.Telegram?.WebApp;
+  <div class="section-title"><h2>Start Earning</h2><span>Earn USDT</span></div>
+  <div class="ref-card">
+    <h3>📺 Watch Ads &amp; Complete Tasks</h3>
+    <p>Earn through available ads and social tasks. Check your eligibility and task status on the Earn page.</p>
+    <button class="btn btn-gold" style="width:100%;margin-top:10px" onclick="goTo('earn')">Go to Earn →</button>
+  </div>
+</section>
 
-    if (tg) {
-      tg.ready();
-      tg.expand();
+<section id="earnPanel" class="panel">
+  <div class="section-title"><h2>Earn USDT</h2><span>Choose a method</span></div>
+  <div class="tabs">
+    <button class="tab active" id="watchTab" onclick="switchEarnTab('ads')">📺 Watch Ads</button>
+    <button class="tab" id="socialTab" onclick="switchEarnTab('social')">📋 Social Tasks</button>
+  </div>
 
-      try {
-        tg.setHeaderColor('#080d1a');
-        tg.setBackgroundColor('#080d1a');
-      } catch (_) {}
+  <div id="adsPanel">
+    <div class="task-list" id="adsList"></div>
+    <p class="small-note">Each verified ad reward: $0.25 USDT. Maximum 12 ads per rolling 24 hours. Rewards require server-side verification.</p>
+  </div>
+
+  <div id="socialPanel" class="hidden">
+    <div class="task-list" id="socialList"></div>
+    <div class="section-title"><h2>YouTube Tasks</h2><span>Coming soon</span></div>
+    <div class="task-list" id="youtubeList"></div>
+    <p class="small-note">Telegram tasks require admin verification. YouTube tasks are not active yet.</p>
+  </div>
+</section>
+
+<section id="referPanel" class="panel">
+  <div class="section-title"><h2>Refer &amp; Earn</h2><span>Invite friends</span></div>
+  <div class="ref-card">
+    <h3>💰 Earn $5 USDT per referral</h3>
+    <p>Share your personal invitation link. Referral rewards are credited once for eligible new registrations.</p>
+    <div class="reward-banner">
+      <div><h3>Your Referrals</h3><p>Successful registrations</p></div>
+      <div class="reward-amount" id="referralCountLarge">0</div>
+    </div>
+    <div class="ref-url" id="referralLink">Loading referral link...</div>
+    <button class="btn btn-gold" style="width:100%" onclick="copyReferral()">Copy Referral Link</button>
+    <button class="btn btn-dark" style="width:100%;margin-top:10px" onclick="shareReferral()">Share with Friends</button>
+  </div>
+</section>
+
+<section id="withdrawPanel" class="panel">
+  <div class="section-title"><h2>Withdraw USDT</h2><span>BEP-20</span></div>
+  <div class="withdraw-card">
+    <h3>💸 Request Withdrawal</h3>
+    <p>Minimum withdrawal: $5 USDT. Complete the required verified ads and approved Telegram tasks before requesting.</p>
+    <div class="reward-banner">
+      <div><h3>Available Balance</h3><p>NX USDT account balance</p></div>
+      <div class="reward-amount">$<span id="withdrawBalance">0.00</span></div>
+    </div>
+    <label for="withdrawAmount" class="small-note">Amount (USDT)</label>
+    <input class="input" id="withdrawAmount" type="number" min="5" step="0.01" placeholder="Minimum 5 USDT">
+    <label for="walletAddress" class="small-note">BNB Smart Chain wallet address</label>
+    <input class="input" id="walletAddress" type="text" placeholder="0x..." autocomplete="off">
+    <button class="btn btn-gold" style="width:100%;margin-top:12px" onclick="requestWithdrawal()">Request Withdrawal</button>
+    <p class="small-note">Withdrawal requests are reviewed manually. Automatic payouts are not enabled.</p>
+  </div>
+  <div class="section-title"><h2>Withdrawal History</h2></div>
+  <div id="payoutHistory" class="task-list"><p class="small-note">No history loaded.</p></div>
+</section>
+
+</main>
+
+<nav class="bottom-nav">
+  <div class="nav-inner">
+    <button class="nav-btn active" data-page="home" onclick="goTo('home')"><span class="nav-icon">🏠</span>Home</button>
+    <button class="nav-btn" data-page="earn" onclick="goTo('earn')"><span class="nav-icon">💰</span>Earn</button>
+    <button class="nav-btn" data-page="refer" onclick="goTo('refer')"><span class="nav-icon">👥</span>Refer</button>
+    <button class="nav-btn" data-page="withdraw" onclick="goTo('withdraw')"><span class="nav-icon">💸</span>Withdraw</button>
+  </div>
+</nav>
+
+<div id="toast" class="toast"></div>
+
+<script>
+'use strict';
+
+const CONFIG = {
+  API_BASE: 'https://nx-usdt-production.up.railway.app',
+  BOT_USERNAME: 'NXCoinRobot',
+  ADSGRAM_BLOCK_ID: '52783',
+  MAIN_CHANNEL: 'https://t.me/NXUSDTEarn',
+  PAYOUT_CHANNEL: 'https://t.me/NXUSDTPayout',
+  AD_REWARD: 0.25,
+  MAX_ADS: 12,
+  TASK_REWARD: 0.25,
+  YOUTUBE_TASKS: 4,
+  MIN_WITHDRAWAL: 5
+};
+
+const tg = window.Telegram?.WebApp;
+let account = null;
+let busy = false;
+let toastTimer = null;
+let adsgramController = null;
+let lastAdsCount = 0;
+
+if (tg) {
+  tg.ready();
+  tg.expand();
+  try {
+    tg.setHeaderColor('#080d1a');
+    tg.setBackgroundColor('#080d1a');
+  } catch (_) {}
+}
+
+async function api(path, body = {}) {
+  if (!tg?.initData) {
+    throw new Error('Please open NX USDT through Telegram.');
+  }
+
+  let response;
+
+  try {
+    response = await fetch(CONFIG.API_BASE + path, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        ...body,
+        initData: tg.initData
+      })
+    });
+  } catch (_) {
+    throw new Error('Failed to fetch. Check internet, CORS and backend URL.');
+  }
+
+  let result;
+
+  try {
+    result = await response.json();
+  } catch (_) {
+    throw new Error('Backend returned an invalid response.');
+  }
+
+  if (!response.ok || result.success === false) {
+    throw new Error(result.error || `Request failed (${response.status}).`);
+  }
+
+  return result;
+}
+
+function toast(message) {
+  const el = document.getElementById('toast');
+  el.textContent = message;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 3500);
+}
+
+function goTo(page) {
+  if (!['home', 'earn', 'refer', 'withdraw'].includes(page)) page = 'home';
+
+  document.querySelectorAll('.panel').forEach(el => el.classList.remove('active'));
+  document.getElementById(page + 'Panel').classList.add('active');
+
+  document.querySelectorAll('.nav-btn').forEach(button => {
+    button.classList.toggle('active', button.dataset.page === page);
+  });
+
+  if (tg?.HapticFeedback) tg.HapticFeedback.selectionChanged();
+  if (page === 'withdraw') loadPayoutHistory();
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function switchEarnTab(tab) {
+  const ads = tab === 'ads';
+
+  document.getElementById('adsPanel').classList.toggle('hidden', !ads);
+  document.getElementById('socialPanel').classList.toggle('hidden', ads);
+  document.getElementById('watchTab').classList.toggle('active', ads);
+  document.getElementById('socialTab').classList.toggle('active', !ads);
+}
+
+function safeText(value) {
+  return String(value ?? '').replace(/[&<>"']/g, char => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
+  })[char]);
+}
+
+function formatMoney(value) {
+  const number = Number(value || 0);
+  return Number.isFinite(number) ? number.toFixed(2) : '0.00';
+}
+
+function renderAds() {
+  const list = document.getElementById('adsList');
+  list.innerHTML = '';
+
+  for (let adId = 1; adId <= CONFIG.MAX_ADS; adId++) {
+    const item = document.createElement('div');
+    item.className = 'task';
+
+    item.innerHTML = `
+      <div class="task-icon">📺</div>
+      <div class="task-info">
+        <h3>Watch Ad #${adId}</h3>
+        <p>Complete one advertisement</p>
+      </div>
+      <div>
+        <div class="task-reward">+$${formatMoney(CONFIG.AD_REWARD)}</div>
+        <button class="task-btn start" id="adBtn${adId}" onclick="watchAd(${adId})">WATCH</button>
+      </div>`;
+
+    list.appendChild(item);
+  }
+}
+
+const SOCIAL_TASKS = [
+  {
+    key: 'telegram_earn',
+    title: 'Join NX USDT Channel',
+    description: 'Join the official earning channel.',
+    icon: '📢',
+    url: CONFIG.MAIN_CHANNEL
+  },
+  {
+    key: 'telegram_payout',
+    title: 'Join Payout Channel',
+    description: 'Receive payout announcements.',
+    icon: '💸',
+    url: CONFIG.PAYOUT_CHANNEL
+  }
+];
+
+function renderSocialTasks() {
+  const list = document.getElementById('socialList');
+  list.innerHTML = '';
+
+  SOCIAL_TASKS.forEach(task => {
+    const status = account?.taskStatus?.[task.key];
+
+    let label = 'START';
+    let css = 'start';
+    let disabled = false;
+
+    if (status === 'pending') {
+      label = 'PENDING';
+      css = 'pending';
+      disabled = true;
+    } else if (status === 'approved') {
+      label = 'APPROVED';
+      css = 'claimed';
+      disabled = true;
+    } else if (status === 'rejected') {
+      label = 'RETRY';
     }
 
-    let account = null;
-    let busy = false;
-    let toastTimer = null;
+    const item = document.createElement('div');
+    item.className = 'task';
 
-    // ==========================================
-    // API
-    // ==========================================
+    item.innerHTML = `
+      <div class="task-icon">${task.icon}</div>
+      <div class="task-info">
+        <h3>${safeText(task.title)}</h3>
+        <p>${safeText(task.description)}</p>
+      </div>
+      <div>
+        <div class="task-reward">+$${formatMoney(CONFIG.TASK_REWARD)}</div>
+        <button class="task-btn ${css}" ${disabled ? 'disabled' : ''}
+          onclick="submitSocialTask('${task.key}')">${label}</button>
+      </div>`;
 
-    async function api(path, body = {}) {
-      if (!tg?.initData) {
-        throw new Error(
-          'Please open NX USDT through Telegram.'
-        );
-      }
+    list.appendChild(item);
+  });
 
-      const response = await fetch(
-        CONFIG.API_BASE.replace(/\/+$/, '') + path,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            ...body,
-            initData: tg.initData
-          })
-        }
-      );
+  const youtubeList = document.getElementById('youtubeList');
+  youtubeList.innerHTML = '';
 
-      let result;
+  for (let i = 1; i <= CONFIG.YOUTUBE_TASKS; i++) {
+    const item = document.createElement('div');
+    item.className = 'task';
+    item.innerHTML = `
+      <div class="task-icon">▶️</div>
+      <div class="task-info">
+        <h3>YouTube Task #${i}</h3>
+        <p>Video task will be available later.</p>
+      </div>
+      <div>
+        <div class="task-reward">+$${formatMoney(CONFIG.TASK_REWARD)}</div>
+        <button class="task-btn soon" disabled>COMING SOON</button>
+      </div>`;
+    youtubeList.appendChild(item);
+  }
+}
 
-      try {
-        result = await response.json();
-      } catch (_) {
-        throw new Error('Invalid backend response.');
-      }
+async function submitSocialTask(taskKey) {
+  if (busy) return;
 
-      if (!response.ok || result.success === false) {
-        throw new Error(
-          result.error || 'Request failed.'
-        );
-      }
+  const task = SOCIAL_TASKS.find(item => item.key === taskKey);
+  if (!task) return toast('Task not found.');
 
-      return result;
+  const status = account?.taskStatus?.[taskKey];
+
+  if (status === 'pending' || status === 'approved') {
+    return toast('This task has already been submitted or approved.');
+  }
+
+  if (tg?.openTelegramLink) {
+    tg.openTelegramLink(task.url);
+  } else {
+    window.open(task.url, '_blank', 'noopener');
+  }
+
+  toast('Join the channel, then return here.');
+
+  setTimeout(async () => {
+    if (!window.confirm('Have you joined the channel? Submit for admin verification?')) return;
+
+    try {
+      busy = true;
+      const result = await api('/tasks/submit', { taskKey });
+      toast(result.message || 'Submitted for admin verification.');
+      await loadAccount();
+    } catch (error) {
+      toast(error.message);
+    } finally {
+      busy = false;
     }
+  }, 700);
+}
 
-    // ==========================================
-    // TOAST
-    // ==========================================
+function getAdsgramController() {
+  if (adsgramController) return adsgramController;
 
-    function toast(message) {
-      const el = document.getElementById('toast');
+  if (!window.Adsgram || typeof window.Adsgram.init !== 'function') {
+    throw new Error('AdsGram SDK did not load. Check your AdsGram setup.');
+  }
 
-      el.textContent = message;
-      el.classList.add('show');
+  adsgramController = window.Adsgram.init({
+    blockId: CONFIG.ADSGRAM_BLOCK_ID
+  });
 
-      clearTimeout(toastTimer);
+  if (!adsgramController || typeof adsgramController.show !== 'function') {
+    adsgramController = null;
+    throw new Error('AdsGram block could not initialize. Check block ID 52783.');
+  }
 
-      toastTimer = setTimeout(() => {
-        el.classList.remove('show');
-      }, 3000);
-    }
+  return adsgramController;
+}
 
-    // ==========================================
-    // PAGE NAVIGATION
-    // ==========================================
+async function waitForReward(adId) {
+  for (let attempt = 0; attempt < 8; attempt++) {
+    await new Promise(resolve =>
+      setTimeout(resolve, attempt === 0 ? 1500 : 2000)
+    );
 
-    function goTo(page) {
-      const validPages = [
-        'home',
-        'earn',
-        'refer',
-        'withdraw'
-      ];
+    try {
+      const status = await api('/adsgram/status', { adId });
 
-      if (!validPages.includes(page)) {
-        page = 'home';
-      }
-
-      document.querySelectorAll('.panel').forEach(el => {
-        el.classList.remove('active');
-      });
-
-      document.getElementById(page + 'Panel')
-        .classList.add('active');
-
-      document.querySelectorAll('.nav-btn').forEach(button => {
-        button.classList.toggle(
-          'active',
-          button.dataset.page === page
-        );
-      });
-
-      if (tg?.HapticFeedback) {
-        tg.HapticFeedback.selectionChanged();
-      }
-
-      if (page === 'withdraw') {
-        loadPayoutHistory();
-      }
-
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    // ==========================================
-    // EARN TABS
-    // ==========================================
-
-    function switchEarnTab(tab) {
-      const adsSelected = tab === 'ads';
-
-      document.getElementById('adsPanel')
-        .classList.toggle('hidden', !adsSelected);
-
-      document.getElementById('socialPanel')
-        .classList.toggle('hidden', adsSelected);
-
-      document.getElementById('watchTab')
-        .classList.toggle('active', adsSelected);
-
-      document.getElementById('socialTab')
-        .classList.toggle('active', !adsSelected);
-    }
-
-    // ==========================================
-    // UTILITIES
-    // ==========================================
-
-    function safeText(value) {
-      return String(value ?? '').replace(/[&<>"']/g, char => ({
-        '&': '&amp;',
-        '<': '&lt;',
-        '>': '&gt;',
-        '"': '&quot;',
-        "'": '&#39;'
-      })[char]);
-    }
-
-    function formatMoney(value) {
-      const number = Number(value || 0);
-      return Number.isFinite(number) ? number.toFixed(2) : '0.00';
-    }
-
-    // ==========================================
-    // ADS LIST
-    // ==========================================
-
-    function renderAds() {
-      const list = document.getElementById('adsList');
-      list.innerHTML = '';
-
-      for (let i = 1; i <= CONFIG.MAX_ADS; i++) {
-        const adId = 100 + i;
-        const item = document.createElement('div');
-
-        item.className = 'task';
-
-        item.innerHTML = `
-          <div class="task-icon">📺</div>
-          <div class="task-info">
-            <h3>Watch Ad #${i}</h3>
-            <p>Complete one advertisement</p>
-          </div>
-          <div>
-            <div class="task-reward">+$${formatMoney(CONFIG.AD_REWARD)}</div>
-            <button class="task-btn start"
-              id="adBtn${adId}"
-              onclick="watchAd(${adId})">
-              WATCH
-            </button>
-          </div>
-        `;
-
-        list.appendChild(item);
-      }
-    }
-
-    // ==========================================
-    // SOCIAL TASKS
-    // ==========================================
-
-    const SOCIAL_TASKS = [
-      {
-        key: 'telegram_earn',
-        title: 'Join NX USDT Channel',
-        description: 'Join the official earning channel.',
-        icon: '📢',
-        url: CONFIG.MAIN_CHANNEL
-      },
-      {
-        key: 'telegram_payout',
-        title: 'Join Payout Channel',
-        description: 'Receive payout announcements.',
-        icon: '💸',
-        url: CONFIG.PAYOUT_CHANNEL
-      }
-    ];
-
-    function renderSocialTasks() {
-      const list = document.getElementById('socialList');
-      list.innerHTML = '';
-
-      SOCIAL_TASKS.forEach(task => {
-        const status = account?.taskStatus?.[task.key];
-
-        let label = 'START';
-        let css = 'start';
-        let disabled = false;
-
-        if (status === 'pending') {
-          label = 'PENDING';
-          css = 'pending';
-          disabled = true;
-        }
-
-        if (status === 'approved') {
-          label = 'CLAIMED';
-          css = 'claimed';
-          disabled = true;
-        }
-
-        if (status === 'rejected') {
-          label = 'REJECTED';
-          css = 'pending';
-          disabled = true;
-        }
-
-        const item = document.createElement('div');
-        item.className = 'task';
-
-        item.innerHTML = `
-          <div class="task-icon">${task.icon}</div>
-          <div class="task-info">
-            <h3>${safeText(task.title)}</h3>
-            <p>${safeText(task.description)}</p>
-          </div>
-          <div>
-            <div class="task-reward">+$${formatMoney(CONFIG.TASK_REWARD)}</div>
-            <button class="task-btn ${css}"
-              ${disabled ? 'disabled' : ''}
-              onclick="submitSocialTask('${task.key}')">
-              ${label}
-            </button>
-          </div>
-        `;
-
-        list.appendChild(item);
-      });
-
-      const youtubeList = document.getElementById('youtubeList');
-      youtubeList.innerHTML = '';
-
-      for (let i = 1; i <= CONFIG.YOUTUBE_TASKS; i++) {
-        const item = document.createElement('div');
-        item.className = 'task';
-
-        item.innerHTML = `
-          <div class="task-icon">▶️</div>
-          <div class="task-info">
-            <h3>YouTube Task #${i}</h3>
-            <p>Video task will be available later.</p>
-          </div>
-          <div>
-            <div class="task-reward">+$${formatMoney(CONFIG.TASK_REWARD)}</div>
-            <button class="task-btn soon" disabled>
-              COMING SOON
-            </button>
-          </div>
-        `;
-
-        youtubeList.appendChild(item);
-      }
-    }
-
-    // ==========================================
-    // SUBMIT TELEGRAM TASK
-    // ==========================================
-
-    async function submitSocialTask(taskKey) {
-      if (busy) return;
-
-      const task = SOCIAL_TASKS.find(
-        item => item.key === taskKey
-      );
-
-      if (!task) {
-        toast('Task not found.');
-        return;
-      }
-
-      if (tg?.openTelegramLink) {
-        tg.openTelegramLink(task.url);
-      } else {
-        window.open(task.url, '_blank');
-      }
-
-      toast('Join the channel, then return to the Mini App.');
-
-      setTimeout(async () => {
-        const confirmed = window.confirm(
-          'Have you joined the channel? Submit for verification?'
-        );
-
-        if (!confirmed) return;
-
-        try {
-          const result = await api('/tasks/submit', {
-            taskKey
-          });
-
-          toast(result.message || 'Submitted for verification.');
-
-          await loadAccount();
-
-        } catch (error) {
-          toast(error.message);
-        }
-      }, 800);
-    }
-
-    // ==========================================
-    // ADSGRAM
-    // ==========================================
-
-    async function watchAd(adId) {
-      if (busy) return;
-
-      try {
-        await api('/adsgram/claim', { adId });
-      } catch (error) {
-        toast(error.message);
-      }
-    }
-
-    // ==========================================
-    // REFERRALS
-    // ==========================================
-
-    function copyReferral() {
-      const link = account?.referralLink;
-
-      if (!link) {
-        toast('Referral link is loading.');
-        return;
-      }
-
-      if (navigator.clipboard?.writeText) {
-        navigator.clipboard.writeText(link)
-          .then(() => toast('Referral link copied!'))
-          .catch(() => fallbackCopy(link));
-      } else {
-        fallbackCopy(link);
-      }
-    }
-
-    function fallbackCopy(value) {
-      const input = document.createElement('textarea');
-      input.value = value;
-      input.style.position = 'fixed';
-      input.style.opacity = '0';
-
-      document.body.appendChild(input);
-      input.select();
-
-      try {
-        document.execCommand('copy');
-        toast('Referral link copied!');
-      } catch (_) {
-        toast('Copy failed. Copy the link manually.');
-      }
-
-      input.remove();
-    }
-
-    function shareReferral() {
-      const link = account?.referralLink;
-
-      if (!link) {
-        toast('Referral link is loading.');
-        return;
-      }
-
-      const shareUrl =
-        'https://t.me/share/url?url=' +
-        encodeURIComponent(link) +
-        '&text=' +
-        encodeURIComponent('Join NX USDT!');
-
-      if (tg?.openTelegramLink) {
-        tg.openTelegramLink(shareUrl);
-      } else {
-        window.open(shareUrl, '_blank');
-      }
-    }
-
-    // ==========================================
-    // WITHDRAWAL
-    // ==========================================
-
-    async function requestWithdrawal() {
-      if (busy) return;
-
-      const amount = Number(
-        document.getElementById('withdrawAmount').value
-      );
-
-      const walletAddress = document
-        .getElementById('walletAddress')
-        .value
-        .trim();
-
-      if (!Number.isFinite(amount) ||
-          amount < CONFIG.MIN_WITHDRAWAL) {
-        toast('Minimum withdrawal is 5 USDT.');
-        return;
-      }
-
-      if (!/^0x[a-fA-F0-9]{40}$/.test(walletAddress)) {
-        toast('Enter a valid BNB Smart Chain wallet address.');
-        return;
-      }
-
-      if (!account || amount > Number(account.balance || 0)) {
-        toast('Insufficient account balance.');
-        return;
-      }
-
-      if (!account.canWithdraw) {
-        toast(
-          `Complete ${account.requiredAds} ads and get ${account.requiredTasks} Telegram tasks approved first.`
-        );
-        return;
-      }
-
-      try {
-        busy = true;
-
-        const result = await api('/payout', {
-          amount,
-          walletAddress
-        });
-
-        toast(result.message || 'Withdrawal request submitted.');
-
+      if (status.verified) {
         await loadAccount();
-
-      } catch (error) {
-        toast(error.message);
-
-      } finally {
-        busy = false;
+        return true;
       }
+    } catch (_) {
+      // Callback may still be processing.
     }
 
-    // ==========================================
-    // PAYOUT HISTORY
-    // ==========================================
+    try {
+      await loadAccount();
 
-    async function loadPayoutHistory() {
-      const container = document.getElementById('payoutHistory');
-
-      try {
-        const result = await api('/payouts');
-        const payouts = result.payouts || [];
-
-        if (!payouts.length) {
-          container.innerHTML =
-            '<p class="small-note">No withdrawals yet.</p>';
-          return;
-        }
-
-        container.innerHTML = '';
-
-        payouts.forEach(payout => {
-          const item = document.createElement('div');
-          item.className = 'task';
-
-          item.innerHTML = `
-            <div class="task-icon">💸</div>
-            <div class="task-info">
-              <h3>${safeText(payout.status)}</h3>
-              <p>${safeText(payout.created_at || '')}</p>
-            </div>
-            <div class="task-reward">
-              $${formatMoney(payout.amount_usdt)}
-            </div>
-          `;
-
-          container.appendChild(item);
-        });
-
-      } catch (_) {
-        container.innerHTML =
-          '<p class="small-note">Could not load payout history.</p>';
+      if (Number(account?.adsWatched || 0) > lastAdsCount) {
+        return true;
       }
+    } catch (_) {}
+  }
+
+  return false;
+}
+
+async function watchAd(adId) {
+  if (busy) return;
+
+  if (!Number.isInteger(adId) || adId < 1 || adId > CONFIG.MAX_ADS) {
+    return toast('Invalid ad slot.');
+  }
+
+  const button = document.getElementById('adBtn' + adId);
+
+  try {
+    if (button) {
+      button.disabled = true;
+      button.textContent = 'LOADING';
     }
 
-    // ==========================================
-    // LOAD USER ACCOUNT
-    // ==========================================
+    // SDK must initialize before creating an attempt.
+    const controller = getAdsgramController();
 
-    async function loadAccount() {
-      try {
-        const result = await api('/sync', {
-          startParam: tg?.initDataUnsafe?.start_param || ''
-        });
+    lastAdsCount = Number(account?.adsWatched || 0);
 
-        account = result;
+    // Correct backend endpoint: /adsgram/start
+    const start = await api('/adsgram/start', { adId });
 
-        document.getElementById('welcome').textContent =
-          'Welcome, ' + (result.user?.first_name || 'User') + '!';
-
-        document.getElementById('balance').textContent =
-          formatMoney(result.balance);
-
-        document.getElementById('withdrawBalance').textContent =
-          formatMoney(result.balance);
-
-        document.getElementById('adsCount').textContent =
-          `${result.adsWatched || 0}/12`;
-
-        document.getElementById('refCount').textContent =
-          result.referrals || 0;
-
-        document.getElementById('referralCountLarge').textContent =
-          result.referrals || 0;
-
-        document.getElementById('taskCount').textContent =
-          `${result.tasksCompleted || 0}/2`;
-
-        document.getElementById('referralLink').textContent =
-          result.referralLink || 'Referral link unavailable';
-
-        renderSocialTasks();
-
-      } catch (error) {
-        console.error(error);
-        toast(error.message);
-
-        document.getElementById('welcome').textContent =
-          'Open NX USDT through Telegram to continue.';
-      }
+    if (start.result?.success === false) {
+      throw new Error(start.result.error || 'Ad attempt denied.');
     }
 
-    // ==========================================
-    // INITIALIZE
-    // ==========================================
+    busy = true;
+    toast('Loading advertisement…');
 
-    renderAds();
-    renderSocialTasks();
+    try {
+      await controller.show();
+    } catch (error) {
+      console.warn('AdsGram ad skipped or failed:', error);
+      toast('Ad was not completed. No reward credited.');
+      return;
+    }
 
-    if (tg?.initData) {
-      loadAccount();
+    toast('Ad completed. Waiting for server verification…');
+
+    const verified = await waitForReward(adId);
+
+    if (verified) {
+      toast('Reward verified. Balance updated!');
     } else {
-      document.getElementById('welcome').textContent =
-        'Open this Mini App through Telegram to sign in.';
+      toast('Verification pending. Check balance again shortly.');
     }
-  </script>
+  } catch (error) {
+    console.error('watchAd:', error);
+    toast(error.message || 'Could not start advertisement.');
+  } finally {
+    busy = false;
+
+    if (button) {
+      button.disabled = false;
+      button.textContent = 'WATCH';
+    }
+  }
+}
+
+function copyReferral() {
+  const link = account?.referralLink;
+  if (!link) return toast('Referral link is loading.');
+
+  if (navigator.clipboard?.writeText) {
+    navigator.clipboard.writeText(link)
+      .then(() => toast('Referral link copied!'))
+      .catch(() => fallbackCopy(link));
+  } else {
+    fallbackCopy(link);
+  }
+}
+
+function fallbackCopy(value) {
+  const input = document.createElement('textarea');
+  input.value = value;
+  input.style.position = 'fixed';
+  input.style.opacity = '0';
+  document.body.appendChild(input);
+  input.select();
+
+  try {
+    document.execCommand('copy');
+    toast('Referral link copied!');
+  } catch (_) {
+    toast('Copy failed. Copy the link manually.');
+  }
+
+  input.remove();
+}
+
+function shareReferral() {
+  const link = account?.referralLink;
+  if (!link) return toast('Referral link is loading.');
+
+  const url = 'https://t.me/share/url?url=' +
+    encodeURIComponent(link) +
+    '&text=' +
+    encodeURIComponent('Join NX USDT!');
+
+  if (tg?.openTelegramLink) {
+    tg.openTelegramLink(url);
+  } else {
+    window.open(url, '_blank', 'noopener');
+  }
+}
+
+async function requestWithdrawal() {
+  if (busy) return;
+
+  const amount = Number(
+    document.getElementById('withdrawAmount').value
+  );
+
+  const walletAddress = document
+    .getElementById('walletAddress').value.trim();
+
+  if (!Number.isFinite(amount) || amount < CONFIG.MIN_WITHDRAWAL) {
+    return toast('Minimum withdrawal is 5 USDT.');
+  }
+
+  if (!/^0x[a-fA-F0-9]{40}$/.test(walletAddress)) {
+    return toast('Enter a valid BNB Smart Chain wallet address.');
+  }
+
+  if (!account || amount > Number(account.balance || 0)) {
+    return toast('Insufficient account balance.');
+  }
+
+  if (!account.canWithdraw) {
+    return toast(
+      `Complete ${account.requiredAds} verified ads and get ${account.requiredTasks} Telegram tasks approved first.`
+    );
+  }
+
+  try {
+    busy = true;
+
+    const result = await api('/payout', {
+      amount,
+      walletAddress
+    });
+
+    toast(result.message || 'Withdrawal request submitted. No automatic transfer was made.');
+
+    await loadAccount();
+    await loadPayoutHistory();
+  } catch (error) {
+    toast(error.message);
+  } finally {
+    busy = false;
+  }
+}
+
+async function loadPayoutHistory() {
+  const container = document.getElementById('payoutHistory');
+
+  try {
+    const result = await api('/payouts');
+    const payouts = result.payouts || [];
+
+    if (!payouts.length) {
+      container.innerHTML = '<p class="small-note">No withdrawals yet.</p>';
+      return;
+    }
+
+    container.innerHTML = '';
+
+    payouts.forEach(payout => {
+      const item = document.createElement('div');
+      item.className = 'task';
+
+      item.innerHTML = `
+        <div class="task-icon">💸</div>
+        <div class="task-info">
+          <h3>${safeText(payout.status || 'pending')}</h3>
+          <p>${safeText(payout.created_at || '')}</p>
+        </div>
+        <div class="task-reward">$${formatMoney(payout.amount_usdt)}</div>`;
+
+      container.appendChild(item);
+    });
+  } catch (error) {
+    container.innerHTML =
+      `<p class="small-note">${safeText(error.message || 'Could not load payout history.')}</p>`;
+  }
+}
+
+async function loadAccount() {
+  const result = await api('/sync', {
+    startParam: tg?.initDataUnsafe?.start_param || ''
+  });
+
+  account = result;
+
+  document.getElementById('welcome').textContent =
+    'Welcome, ' + (result.user?.first_name || 'User') + '!';
+
+  document.getElementById('balance').textContent =
+    formatMoney(result.balance);
+
+  document.getElementById('withdrawBalance').textContent =
+    formatMoney(result.balance);
+
+  document.getElementById('adsCount').textContent =
+    `${result.adsWatched || 0}/${CONFIG.MAX_ADS}`;
+
+  document.getElementById('refCount').textContent =
+    result.referrals || 0;
+
+  document.getElementById('referralCountLarge').textContent =
+    result.referrals || 0;
+
+  document.getElementById('taskCount').textContent =
+    `${result.tasksCompleted || 0}/${result.requiredTasks || 2}`;
+
+  document.getElementById('referralLink').textContent =
+    result.referralLink || 'Referral link unavailable';
+
+  renderSocialTasks();
+}
+
+async function initialize() {
+  renderAds();
+  renderSocialTasks();
+
+  if (!tg?.initData) {
+    document.getElementById('welcome').textContent =
+      'Open this Mini App through Telegram to sign in.';
+    toast('Telegram authentication is required.');
+    return;
+  }
+
+  try {
+    await loadAccount();
+  } catch (error) {
+    console.error('Account load failed:', error);
+    document.getElementById('welcome').textContent =
+      'Could not load account. Reopen the Mini App.';
+    toast(error.message || 'Could not load account.');
+  }
+}
+
+initialize();
+</script>
 </body>
 </html>
