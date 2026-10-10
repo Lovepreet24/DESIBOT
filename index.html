@@ -176,9 +176,9 @@ button:disabled{opacity:.65;cursor:not-allowed}
 
   <div id="socialPanel" class="hidden">
     <div class="task-list" id="socialList"></div>
-    <div class="section-title"><h2>YouTube Tasks</h2><span>Coming soon</span></div>
+    <div class="section-title"><h2>YouTube Tasks</h2><span>Admin verified</span></div>
     <div class="task-list" id="youtubeList"></div>
-    <p class="small-note">Telegram tasks require admin verification. YouTube tasks are not active yet.</p>
+    <p class="small-note">Telegram channel tasks are verified automatically. YouTube tasks are verified by admin.</p>
   </div>
 </section>
 
@@ -211,7 +211,7 @@ button:disabled{opacity:.65;cursor:not-allowed}
     <label for="walletAddress" class="small-note">BNB Smart Chain wallet address</label>
     <input class="input" id="walletAddress" type="text" placeholder="0x..." autocomplete="off">
     <button class="btn btn-gold" style="width:100%;margin-top:12px" onclick="requestWithdrawal()">Request Withdrawal</button>
-    <p class="small-note">Withdrawal requests are reviewed manually. Automatic payouts are not enabled.</p>
+    <p class="small-note">Payouts are sent automatically to your BEP-20 wallet after a quick check.</p>
   </div>
   <div class="section-title"><h2>Withdrawal History</h2></div>
   <div id="payoutHistory" class="task-list"><p class="small-note">No history loaded.</p></div>
@@ -466,21 +466,26 @@ const SOCIAL_TASKS = [
   {key:'telegram_payout',title:'Join Payout Channel',description:'Receive payout announcements.',icon:'💸',url:CONFIG.PAYOUT_CHANNEL}
 ];
 
-function renderSocialTasks() {
-  const list = document.getElementById('socialList');
+const YOUTUBE_TASKS = [
+  {key:'youtube_1',title:'YouTube Task #1',description:'Watch the video, then submit.',icon:'▶️',url:'https://youtube.com/REPLACE_1'},
+  {key:'youtube_2',title:'YouTube Task #2',description:'Watch the video, then submit.',icon:'▶️',url:'https://youtube.com/REPLACE_2'},
+  {key:'youtube_3',title:'YouTube Task #3',description:'Watch the video, then submit.',icon:'▶️',url:'https://youtube.com/REPLACE_3'},
+  {key:'youtube_4',title:'YouTube Task #4',description:'Watch the video, then submit.',icon:'▶️',url:'https://youtube.com/REPLACE_4'}
+];
+
+const ALL_TASKS = [...SOCIAL_TASKS, ...YOUTUBE_TASKS];
+
+function renderTaskList(containerId, tasks) {
+  const list = document.getElementById(containerId);
   list.innerHTML = '';
 
-  SOCIAL_TASKS.forEach(task => {
+  tasks.forEach(task => {
     const status = account?.taskStatus?.[task.key];
     let label = 'START', css = 'start', disabled = false;
 
-    if (status === 'pending') {
-      label = 'PENDING'; css = 'pending'; disabled = true;
-    } else if (status === 'approved') {
-      label = 'APPROVED'; css = 'claimed'; disabled = true;
-    } else if (status === 'rejected') {
-      label = 'RETRY';
-    }
+    if (status === 'pending') { label = 'PENDING'; css = 'pending'; disabled = true; }
+    else if (status === 'approved') { label = 'APPROVED'; css = 'claimed'; disabled = true; }
+    else if (status === 'rejected') { label = 'RETRY'; }
 
     const item = document.createElement('div');
     item.className = 'task';
@@ -497,26 +502,21 @@ function renderSocialTasks() {
       </div>`;
     list.appendChild(item);
   });
+}
 
-  const youtube = document.getElementById('youtubeList');
-  youtube.innerHTML = '';
-
-  for (let i=1;i<=CONFIG.YOUTUBE_TASKS;i++) {
-    const item = document.createElement('div');
-    item.className = 'task';
-    item.innerHTML = `
-      <div class="task-icon">▶️</div>
-      <div class="task-info"><h3>YouTube Task #${i}</h3><p>Video task will be available later.</p></div>
-      <div><div class="task-reward">+$${formatMoney(CONFIG.TASK_REWARD)}</div>
-      <button class="task-btn soon" disabled>COMING SOON</button></div>`;
-    youtube.appendChild(item);
-  }
+function renderSocialTasks() {
+  renderTaskList('socialList', SOCIAL_TASKS);
+  renderTaskList('youtubeList', YOUTUBE_TASKS);
+}
+function askConfirm(message, callback) {
+  if (tg?.showConfirm) tg.showConfirm(message, callback);
+  else callback(window.confirm(message));
 }
 
 async function submitSocialTask(taskKey) {
   if (busy) return;
 
-  const task = SOCIAL_TASKS.find(t => t.key === taskKey);
+  const task = ALL_TASKS.find(t => t.key === taskKey);
   if (!task) return toast('Task not found.');
 
   const status = account?.taskStatus?.[taskKey];
@@ -524,28 +524,30 @@ async function submitSocialTask(taskKey) {
     return toast('Task already submitted or approved.');
   }
 
-  if (tg?.openTelegramLink) tg.openTelegramLink(task.url);
-  else window.open(task.url,'_blank','noopener');
+  if (task.url.startsWith('https://t.me') && tg?.openTelegramLink) tg.openTelegramLink(task.url);
+  else if (tg?.openLink) tg.openLink(task.url);
+  else window.open(task.url, '_blank', 'noopener');
 
-  toast('Join the channel, then return here.');
+  toast('Complete the task, then return here.');
 
-  setTimeout(async () => {
-    if (!window.confirm('Have you joined the channel? Submit for admin verification?')) return;
+  setTimeout(() => {
+    askConfirm('Have you completed this task? Submit now?', async ok => {
+      if (!ok) return;
 
-    try {
-      busy = true;
-      const result = await api('/tasks/submit',{taskKey});
-      toast(result.message || 'Submitted for admin verification.');
-      await loadAccount();
-    } catch (error) {
-      toast(error.message);
-    } finally {
-      busy = false;
-      updateAllAdButtons();
-    }
-  },700);
+      try {
+        busy = true;
+        const result = await api('/tasks/submit', {taskKey});
+        toast(result.message || 'Submitted.');
+        await loadAccount();
+      } catch (error) {
+        toast(error.message);
+      } finally {
+        busy = false;
+        updateAllAdButtons();
+      }
+    });
+  }, 700);
 }
-
 function getAdsgramController() {
   if (adsgramController) return adsgramController;
 
