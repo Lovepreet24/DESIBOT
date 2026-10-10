@@ -87,6 +87,9 @@ button:disabled{opacity:.65;cursor:not-allowed}
 .task-btn.claimed{background:rgba(61,220,151,.13);color:var(--green)}
 .task-btn.cooldown{background:#242d40;color:#aab5c8;min-width:100px;font-size:10px}
 .task-btn.soon{background:#242d40;color:#aab5c8}
+.task-btns{display:flex;gap:6px;justify-content:flex-end}
+.task-btns .task-btn{min-width:64px}
+.task-btn.verify{background:var(--green);color:#0b1a12}
 .small-note{font-size:11px;line-height:1.6;color:var(--muted);margin:12px 2px}
 .panel{display:none}
 .panel.active{display:block}
@@ -176,9 +179,9 @@ button:disabled{opacity:.65;cursor:not-allowed}
 
   <div id="socialPanel" class="hidden">
     <div class="task-list" id="socialList"></div>
-    <div class="section-title"><h2>YouTube Tasks</h2><span>Admin verified</span></div>
+    <div class="section-title"><h2>YouTube Tasks</h2><span>35s timer</span></div>
     <div class="task-list" id="youtubeList"></div>
-    <p class="small-note">Telegram channel tasks are verified automatically. YouTube tasks are verified by admin.</p>
+    <p class="small-note">Telegram channel tasks are verified automatically. For YouTube tasks, press START, watch the video for at least 35 seconds, then press VERIFY.</p>
   </div>
 </section>
 
@@ -467,10 +470,10 @@ const SOCIAL_TASKS = [
 ];
 
 const YOUTUBE_TASKS = [
-  {key:'youtube_1',title:'YouTube Task #1',description:'Watch the video, then submit.',icon:'▶️',url:'https://youtube.com/REPLACE_1'},
-  {key:'youtube_2',title:'YouTube Task #2',description:'Watch the video, then submit.',icon:'▶️',url:'https://youtube.com/REPLACE_2'},
-  {key:'youtube_3',title:'YouTube Task #3',description:'Watch the video, then submit.',icon:'▶️',url:'https://youtube.com/REPLACE_3'},
-  {key:'youtube_4',title:'YouTube Task #4',description:'Watch the video, then submit.',icon:'▶️',url:'https://youtube.com/REPLACE_4'}
+  {key:'youtube_1',title:'YouTube Task #1',description:'Press START, watch 35 seconds, then VERIFY.',icon:'▶️',url:'https://youtube.com/REPLACE_1'},
+  {key:'youtube_2',title:'YouTube Task #2',description:'Press START, watch 35 seconds, then VERIFY.',icon:'▶️',url:'https://youtube.com/REPLACE_2'},
+  {key:'youtube_3',title:'YouTube Task #3',description:'Press START, watch 35 seconds, then VERIFY.',icon:'▶️',url:'https://youtube.com/REPLACE_3'},
+  {key:'youtube_4',title:'YouTube Task #4',description:'Press START, watch 35 seconds, then VERIFY.',icon:'▶️',url:'https://youtube.com/REPLACE_4'}
 ];
 
 const ALL_TASKS = [...SOCIAL_TASKS, ...YOUTUBE_TASKS];
@@ -506,8 +509,129 @@ function renderTaskList(containerId, tasks) {
 
 function renderSocialTasks() {
   renderTaskList('socialList', SOCIAL_TASKS);
-  renderTaskList('youtubeList', YOUTUBE_TASKS);
+  renderYoutubeTasks();
 }
+
+/* ---------- YouTube tasks: START -> wait 35s -> VERIFY ---------- */
+const YT_WATCH_SECONDS = 35;
+let ytState = {};
+let ytStorageKey = 'nxusdt_yt_tasks_v1';
+
+function loadYtState() {
+  try {
+    const userId = tg?.initDataUnsafe?.user?.id;
+    ytStorageKey = 'nxusdt_yt_tasks_v1_' + (userId || 'telegram');
+    ytState = JSON.parse(localStorage.getItem(ytStorageKey) || '{}');
+  } catch (_) {
+    ytState = {};
+  }
+}
+
+function saveYtState() {
+  try { localStorage.setItem(ytStorageKey, JSON.stringify(ytState)); } catch (_) {}
+}
+
+function resetYoutubeTask(taskKey) {
+  delete ytState[taskKey];
+  saveYtState();
+  renderYoutubeTasks();
+}
+
+function renderYoutubeTasks() {
+  const list = document.getElementById('youtubeList');
+  list.innerHTML = '';
+
+  YOUTUBE_TASKS.forEach(task => {
+    const status = account?.taskStatus?.[task.key];
+    const started = Boolean(ytState[task.key]);
+    let buttons;
+
+    if (status === 'approved') {
+      buttons = `<button class="task-btn claimed" disabled>APPROVED</button>`;
+    } else if (status === 'pending') {
+      buttons = `<button class="task-btn pending" disabled>PENDING</button>`;
+    } else if (started) {
+      buttons = `<div class="task-btns">
+        <button class="task-btn start" disabled>START</button>
+        <button class="task-btn verify" onclick="verifyYoutubeTask('${task.key}')">VERIFY</button>
+      </div>`;
+    } else {
+      buttons = `<button class="task-btn start" onclick="startYoutubeTask('${task.key}')">START</button>`;
+    }
+
+    const item = document.createElement('div');
+    item.className = 'task';
+    item.innerHTML = `
+      <div class="task-icon">${task.icon}</div>
+      <div class="task-info">
+        <h3>${safeText(task.title)}</h3>
+        <p>${safeText(task.description)}</p>
+      </div>
+      <div>
+        <div class="task-reward">+$${formatMoney(CONFIG.TASK_REWARD)}</div>
+        ${buttons}
+      </div>`;
+    list.appendChild(item);
+  });
+}
+
+async function startYoutubeTask(taskKey) {
+  if (busy) return;
+
+  const task = YOUTUBE_TASKS.find(t => t.key === taskKey);
+  if (!task) return toast('Task not found.');
+
+  /* Open the video first, while the tap is still a direct user action. */
+  if (tg?.openLink) tg.openLink(task.url);
+  else window.open(task.url, '_blank', 'noopener');
+
+  try {
+    busy = true;
+    const result = await api('/tasks/youtube/start', { taskKey });
+
+    ytState[taskKey] = { token: result.token, startedAt: Date.now() };
+    saveYtState();
+    renderYoutubeTasks();
+
+    toast('Watch for at least ' + YT_WATCH_SECONDS + ' seconds, then press VERIFY.');
+  } catch (error) {
+    toast(error.message);
+  } finally {
+    busy = false;
+  }
+}
+
+async function verifyYoutubeTask(taskKey) {
+  if (busy) return;
+
+  const state = ytState[taskKey];
+  if (!state) return renderYoutubeTasks();
+
+  const elapsed = (Date.now() - state.startedAt) / 1000;
+
+  if (elapsed < YT_WATCH_SECONDS) {
+    resetYoutubeTask(taskKey);
+    return toast('Verified too early, no reward. Watch the full video and press START again.');
+  }
+
+  try {
+    busy = true;
+    const result = await api('/tasks/submit', { taskKey, token: state.token });
+
+    delete ytState[taskKey];
+    saveYtState();
+
+    toast(result.message || 'Task verified.');
+    await loadAccount();
+  } catch (error) {
+    resetYoutubeTask(taskKey);
+    toast(error.message || 'Verification failed. Press START again.');
+  } finally {
+    busy = false;
+    updateAllAdButtons();
+  }
+}
+
 function askConfirm(message, callback) {
   if (tg?.showConfirm) tg.showConfirm(message, callback);
   else callback(window.confirm(message));
@@ -843,6 +967,7 @@ async function loadAccount() {
 
 async function initialize() {
   setCooldownStorageKey();
+  loadYtState();
   loadLocalCooldowns();
   renderAds();
   renderSocialTasks();
