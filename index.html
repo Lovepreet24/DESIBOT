@@ -48,7 +48,7 @@ button:disabled{opacity:.65;cursor:not-allowed}
 }
 .balance-label{color:#d5dced;font-size:13px}
 .balance{font-size:37px;font-weight:900;margin:12px 0 7px;overflow-wrap:anywhere}
-.balance span{color:var(--gold);font-size:18px}
+.balance span{color:var(--gold);font-size:inherit}
 .chain-label{color:var(--muted);font-size:11px}
 .balance-actions{display:flex;gap:10px;margin-top:21px}
 .btn{border:0;border-radius:12px;padding:12px 14px;font-weight:800;font-size:13px;flex:1}
@@ -91,6 +91,17 @@ button:disabled{opacity:.65;cursor:not-allowed}
 .task-btns .task-btn{min-width:64px}
 .task-btn.verify{background:var(--green);color:#0b1a12}
 .small-note{font-size:11px;line-height:1.6;color:var(--muted);margin:12px 2px}
+.req-card{background:var(--panel);border:1px solid var(--border);border-radius:19px;padding:18px;margin-top:15px}
+.req-kicker{font-size:10px;font-weight:800;letter-spacing:.08em;color:var(--muted)}
+.req-title{font-size:18px;margin:8px 0 14px}
+.req-list{display:flex;flex-direction:column;gap:10px}
+.req-item{display:flex;align-items:center;gap:12px;padding:12px;background:var(--panel2);border:1px solid var(--border);border-radius:14px}
+.req-icon{font-size:24px;flex-shrink:0}
+.req-info{flex:1;min-width:0}
+.req-info h4{margin:0 0 4px;font-size:13px}
+.req-info p{margin:0;font-size:11px;color:var(--muted)}
+.req-item.done .req-info h4{color:var(--green)}
+.req-btn{border:0;border-radius:10px;padding:10px 12px;font-size:11px;font-weight:900;background:rgba(61,220,151,.13);color:var(--green);white-space:nowrap}
 .panel{display:none}
 .panel.active{display:block}
 .ref-card,.withdraw-card{background:var(--panel);border:1px solid var(--border);border-radius:19px;padding:18px;margin-top:15px}
@@ -158,14 +169,9 @@ button:disabled{opacity:.65;cursor:not-allowed}
   </div>
 
   <div class="stats">
-    <div class="stat"><div class="stat-icon">📺</div><div class="stat-value" id="adsCount">0/12</div><div class="stat-label">Ads Today</div></div>
+    <div class="stat"><div class="stat-icon">📺</div><div class="stat-value" id="adsCount">0/12</div><div class="stat-label">Ads (8h)</div></div>
     <div class="stat"><div class="stat-icon">👥</div><div class="stat-value" id="refCount">0</div><div class="stat-label">Referrals</div></div>
     <div class="stat"><div class="stat-icon">📋</div><div class="stat-value" id="taskCount">0/2</div><div class="stat-label">Tasks Approved</div></div>
-  </div>
-
-  <div class="reward-banner">
-    <div><h3>🎁 Welcome Bonus</h3><p>New account bonus, credited once.</p></div>
-    <div class="reward-amount">$10</div>
   </div>
 
   <div class="section-title"><h2>Start Earning</h2><span>Earn USDT</span></div>
@@ -185,7 +191,7 @@ button:disabled{opacity:.65;cursor:not-allowed}
 
   <div id="adsPanel">
     <div class="task-list" id="adsList"></div>
-    <p class="small-note">Each verified ad reward: $0.25 USDT. Each ad slot has its own 24-hour cooldown after a successful reward.</p>
+    <p class="small-note">Each verified ad reward: $0.25 USDT. Each ad slot has its own 8-hour cooldown after a successful reward.</p>
   </div>
 
   <div id="socialPanel" class="hidden">
@@ -215,7 +221,7 @@ button:disabled{opacity:.65;cursor:not-allowed}
   <div class="section-title"><h2>Withdraw USDT</h2><span>BEP-20</span></div>
   <div class="withdraw-card">
     <h3>💸 Request Withdrawal</h3>
-    <p>Minimum withdrawal: $5 USDT. Complete the required verified ads and approved Telegram tasks before requesting.</p>
+    <p>Minimum withdrawal: $5 USDT. Complete the required ads and tasks before requesting.</p>
     <div class="reward-banner">
       <div><h3>Available Balance</h3><p>NX USDT account balance</p></div>
       <div class="reward-amount">$<span id="withdrawBalance">0.00</span></div>
@@ -226,6 +232,11 @@ button:disabled{opacity:.65;cursor:not-allowed}
     <input class="input" id="walletAddress" type="text" placeholder="0x..." autocomplete="off">
     <button class="btn btn-gold" style="width:100%;margin-top:12px" onclick="requestWithdrawal()">Request Withdrawal</button>
     <p class="small-note">Payouts are sent automatically to your BEP-20 wallet after a quick check.</p>
+  </div>
+  <div id="reqCard" class="req-card hidden">
+    <div class="req-kicker">WITHDRAWAL REQUIREMENTS</div>
+    <h3 class="req-title">Pending requirements</h3>
+    <div id="reqList" class="req-list"></div>
   </div>
   <div class="section-title"><h2>Withdrawal History</h2></div>
   <div id="payoutHistory" class="task-list"><p class="small-note">No history loaded.</p></div>
@@ -265,7 +276,8 @@ const CONFIG = {
   TASK_REWARD: 0.25,
   YOUTUBE_TASKS: 4,
   MIN_WITHDRAWAL: 5,
-  AD_COOLDOWN_MS: 24 * 60 * 60 * 1000,
+  AD_COOLDOWN_HOURS: 8,
+  AD_COOLDOWN_MS: 8 * 60 * 60 * 1000,
   /* Ad slots where the "Go!" click is NOT required (watching the full ad is enough). */
   NO_CLICK_ADS: [1]
 };
@@ -352,7 +364,10 @@ function goTo(page) {
   });
 
   if (tg?.HapticFeedback) tg.HapticFeedback.selectionChanged();
-  if (page === 'withdraw') loadPayoutHistory();
+  if (page === 'withdraw') {
+    loadPayoutHistory();
+    refreshAccountQuiet();
+  }
 
   window.scrollTo({top:0,behavior:'smooth'});
 }
@@ -451,7 +466,7 @@ function updateAdButton(adId) {
     button.disabled = true;
     button.className = 'task-btn cooldown';
     button.textContent = formatCountdown(remaining);
-    button.title = 'This ad slot will be available after its 24-hour cooldown.';
+    button.title = 'This ad slot will be available after its ' + CONFIG.AD_COOLDOWN_HOURS + '-hour cooldown.';
   } else {
     button.disabled = Boolean(busy);
     button.className = 'task-btn start';
@@ -518,10 +533,10 @@ const SOCIAL_TASKS = [
 ];
 
 const YOUTUBE_TASKS = [
-  {key:'youtube_1',title:'YouTube Task #1',description:'Press START, watch full video, then VERIFY.',icon:'▶️',url:'https://youtube.com/REPLACE_1'},
-  {key:'youtube_2',title:'YouTube Task #2',description:'Press START, watch full video, then VERIFY.',icon:'▶️',url:'https://youtube.com/REPLACE_2'},
-  {key:'youtube_3',title:'YouTube Task #3',description:'Press START, watch full video, then VERIFY.',icon:'▶️',url:'https://youtube.com/REPLACE_3'},
-  {key:'youtube_4',title:'YouTube Task #4',description:'Press START, watch full video, then VERIFY.',icon:'▶️',url:'https://youtube.com/REPLACE_4'}
+  {key:'youtube_1',title:'YouTube Task #1',description:'Press START, watch full video, then VERIFY.',icon:'▶️',url:'https://youtu.be/s9CRZvf2oHI?si=WJsPvPmfuDHsm1wo'},
+  {key:'youtube_2',title:'YouTube Task #2',description:'Press START, watch full video, then VERIFY.',icon:'▶️',url:'https://youtu.be/HnWKOEg-2do?si=IEcVjlDAVZlap968'},
+  {key:'youtube_3',title:'YouTube Task #3',description:'Press START, watch full video, then VERIFY.',icon:'▶️',url:'https://youtu.be/daFDByPcNL4?si=m_XDOMOW8xihIXYu'},
+  {key:'youtube_4',title:'YouTube Task #4',description:'Press START, watch full video, then VERIFY.',icon:'▶️',url:'https://youtu.be/3JRt5cT9mFg?si=WbUBQdQpRTWYymGx'}
 ];
 
 const ALL_TASKS = [...SOCIAL_TASKS, ...YOUTUBE_TASKS];
@@ -982,7 +997,7 @@ async function watchAd(adId) {
 
     startAdCooldown(adId, Date.now());
 
-    if (statusText) statusText.textContent = 'Completed. Available again in 24 hours.';
+    if (statusText) statusText.textContent = 'Completed. Available again in ' + CONFIG.AD_COOLDOWN_HOURS + ' hours.';
 
     await loadAccount();
 
@@ -1001,6 +1016,71 @@ async function watchAd(adId) {
       button.textContent = 'WATCH';
     }
   }
+}
+
+/* Reload account data in the background (used when the Withdraw page opens). */
+async function refreshAccountQuiet() {
+  if (!tg?.initData || busy) return;
+  try { await loadAccount(); } catch (_) {}
+}
+
+function goToEarn(tab) {
+  goTo('earn');
+  switchEarnTab(tab);
+}
+
+/* "Withdrawal requirements" card: shown on the Withdraw page while ads/tasks are incomplete. */
+function renderRequirements() {
+  const card = document.getElementById('reqCard');
+  const list = document.getElementById('reqList');
+  if (!card || !list) return;
+
+  if (!account) {
+    card.classList.add('hidden');
+    return;
+  }
+
+  const reqAds = Number(account.requiredAds || 0);
+  const reqTasks = Number(account.requiredTasks || 0);
+  const ads = Number(account.adsWatched || 0);
+  const tasks = Number(account.tasksCompleted || 0);
+  const adsOk = ads >= reqAds;
+  const tasksOk = tasks >= reqTasks;
+
+  if (adsOk && tasksOk) {
+    card.classList.add('hidden');
+    return;
+  }
+
+  const adsLeft = Math.max(0, reqAds - ads);
+  const tasksLeft = Math.max(0, reqTasks - tasks);
+  const adsShown = Math.min(ads, reqAds);
+  const tasksShown = Math.min(tasks, reqTasks);
+
+  const adsItem = adsOk
+    ? `<div class="req-item done">
+         <div class="req-icon">✅</div>
+         <div class="req-info"><h4>Ads requirement completed</h4><p>${adsShown}/${reqAds} ads in last ${CONFIG.AD_COOLDOWN_HOURS}h</p></div>
+       </div>`
+    : `<div class="req-item">
+         <div class="req-icon">📺</div>
+         <div class="req-info"><h4>Watch ${adsLeft} more ${adsLeft === 1 ? 'ad' : 'ads'}</h4><p>${adsShown}/${reqAds} ads in last ${CONFIG.AD_COOLDOWN_HOURS}h</p></div>
+         <button class="req-btn" onclick="goToEarn('ads')">Watch →</button>
+       </div>`;
+
+  const tasksItem = tasksOk
+    ? `<div class="req-item done">
+         <div class="req-icon">✅</div>
+         <div class="req-info"><h4>Task requirement completed</h4><p>${tasksShown}/${reqTasks} tasks completed</p></div>
+       </div>`
+    : `<div class="req-item">
+         <div class="req-icon">📋</div>
+         <div class="req-info"><h4>Complete ${tasksLeft} more ${tasksLeft === 1 ? 'task' : 'tasks'}</h4><p>${tasksShown}/${reqTasks} tasks completed</p></div>
+         <button class="req-btn" onclick="goToEarn('social')">Complete →</button>
+       </div>`;
+
+  list.innerHTML = adsItem + tasksItem;
+  card.classList.remove('hidden');
 }
 
 function copyReferral() {
@@ -1064,7 +1144,10 @@ async function requestWithdrawal() {
   }
 
   if (!account.canWithdraw) {
-    return toast(`Complete ${account.requiredAds} verified ads and get ${account.requiredTasks} Telegram tasks approved first.`);
+    renderRequirements();
+    const reqCard = document.getElementById('reqCard');
+    if (reqCard && !reqCard.classList.contains('hidden')) reqCard.scrollIntoView({behavior:'smooth', block:'center'});
+    return toast(`Complete ${account.requiredAds} ads and ${account.requiredTasks} tasks first.`);
   }
 
   try {
@@ -1123,6 +1206,18 @@ async function loadAccount() {
   account = result;
   account._loadedAt = Date.now();
 
+  /* The server is the source of truth for ad slot locks. */
+  if (Array.isArray(result.adCooldowns)) {
+    const synced = {};
+    result.adCooldowns.forEach(slot => {
+      if (slot.locked && Number(slot.remainingSeconds) > 0) {
+        synced[slot.adId] = Date.now() + Number(slot.remainingSeconds) * 1000;
+      }
+    });
+    adCooldowns = synced;
+    saveLocalCooldowns();
+  }
+
   document.getElementById('welcome').textContent =
     'Welcome, ' + (result.user?.first_name || 'User') + '!';
 
@@ -1142,12 +1237,13 @@ async function loadAccount() {
     result.referrals || 0;
 
   document.getElementById('taskCount').textContent =
-    `${result.tasksCompleted || 0}/${result.requiredTasks || 2}`;
+    `${Math.min(result.tasksCompleted || 0, result.requiredTasks || 2)}/${result.requiredTasks || 2}`;
 
   document.getElementById('referralLink').textContent =
     result.referralLink || 'Referral link unavailable';
 
   renderSocialTasks();
+  renderRequirements();
   updateAllAdButtons();
 }
 
