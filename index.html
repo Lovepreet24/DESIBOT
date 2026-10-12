@@ -988,6 +988,135 @@ async function watchAd(adId) {
 
     try {
       const shown = await controller.show();
+      /* Resolved = the ad was watched. Skipped/closed ads reject. */
+      adDone = !(shown && shown.done === false);
+    } catch (error) {
+      console.warn('AdsGram show error:', error);
+    } finally {
+      stopIntercept();
+    }
+
+    const earned = clickRequired ? adClickDetected : adDone;
+
+    if (!earned) {
+      try { await api('/adsgram/cancel'); } catch (_) {}
+
+      if (clickRequired) {
+        if (statusText) statusText.textContent = 'Tap "Go!" on the ad to earn the reward.';
+        showPopup('Must click inside the ad to interact with it!');
+      } else {
+        if (statusText) statusText.textContent = 'Watch the full ad to earn the reward.';
+        showPopup('Please watch the full ad to receive the reward.');
+      }
+      return;
+    }
+
+    toast(clickRequired
+      ? 'Ad clicked. Requesting reward verification...'
+      : 'Ad completed. Requesting reward verification...');
+
+    const claim = await api('/adsgram/claim', { adId, clicked: clickRequired });
+
+    if (claim.success !== true) {
+      throw new Error(claim.error || 'Reward was not credited.');
+    }
+
+    startAdCooldown(adId, Date.now());
+
+    if (statusText) statusText.textContent = 'Completed. Available again in ' + CONFIG.AD_COOLDOWN_HOURS + ' hours.';
+
+    await loadAccount();
+
+    toast('Reward processed. Balance: $' + formatMoney(account?.balance));
+  } catch (error) {
+    console.error('AdsGram reward error:', error);
+    if (statusText) statusText.textContent = 'Available status will refresh on retry.';
+    toast(error.message || 'Could not process ad reward.');
+  } finally {
+    busy = false;
+    updateAllAdButtons();
+
+    if (button && !getRemainingMs(adId)) {
+      button.disabled = false;
+      button.className = 'task-btn start';
+      button.textContent = 'WATCH';
+    }
+  }
+}
+
+/* Reload account data in the background (used when the Withdraw page opens). */
+async function refreshAccountQuiet() {
+  if (!tg?.initData || busy) return;
+  try { await loadAccount(); } catch (_) {}
+}
+
+function goToEarn(tab) {
+  goTo('earn');
+  switchEarnTab(tab);
+}
+
+/* "Withdrawal requirements" card: shown on the Withdraw page while ads/tasks are incomplete. */
+function renderRequirements() {
+  const card = document.getElementById('reqCard');
+  const list = document.getElementById('reqList');
+  if (!card || !list) return;
+
+  if (!account) {
+    card.classList.add('hidden');
+    return;
+  }
+
+  const reqAds = Number(account.requiredAds || 0);
+  const reqTasks = Number(account.requiredTasks || 0);
+  const ads = Number(account.adsWatched || 0);
+  const tasks = Number(account.tasksCompleted || 0);
+  const adsOk = ads >= reqAds;
+  const tasksOk = tasks >= reqTasks;
+
+  if (adsOk && tasksOk) {
+    card.classList.add('hidden');
+    return;
+  }
+
+  const adsLeft = Math.max(0, reqAds - ads);
+  const tasksLeft = Math.max(0, reqTasks - tasks);
+  const adsShown = Math.min(ads, reqAds);
+  const tasksShown = Math.min(tasks, reqTasks);
+
+  const adsItem = adsOk
+    ? `<div class="req-item done">
+         <div class="req-icon">✅</div>
+         <div class="req-info"><h4>Ads requirement completed</h4><p>${adsShown}/${reqAds} ads in last ${CONFIG.AD_COOLDOWN_HOURS}h</p></div>
+       </div>`
+    : `<div class="req-item">
+         <div class="req-icon">📺</div>
+         <div class="req-info"><h4>Watch ${adsLeft} more ${adsLeft === 1 ? 'ad' : 'ads'}</h4><p>${adsShown}/${reqAds} ads in last ${CONFIG.AD_COOLDOWN_HOURS}h</p></div>
+         <button class="req-btn" onclick="goToEarn('ads')">Watch →</button>
+       </div>`;
+
+  const tasksItem = tasksOk
+    ? `<div class="req-item done">
+         <div class="req-icon">✅</div>
+         <div class="req-info"><h4>Task requirement completed</h4><p>${tasksShown}/${reqTasks} tasks completed</p></div>
+       </div>`
+    : `<div class="req-item">
+         <div class="req-icon">📋</div>
+         <div class="req-info"><h4>Complete ${tasksLeft} more ${tasksLeft === 1 ? 'task' : 'tasks'}</h4><p>${tasksShown}/${reqTasks} tasks completed</p></div>
+         <button class="req-btn" onclick="goToEarn('social')">Complete →</button>
+       </div>`;
+
+  list.innerHTML = adsItem + tasksItem;
+  card.classList.remove('hidden');
+}
+
+function copyReferral() {
+  const link = account?.referralLink;
+  if (!link) return toast('Referral link is loading.');
+
+  if (navigator.clipboard?.writeText) {
+    navigator.clipboard.writeText(link)
+      .then(()=>toast('Referral link copied!'))
+      .catch(()=>fallbackCopy(link));
   } else {
     fallbackCopy(link);
   }
@@ -1025,6 +1154,124 @@ function shareReferral() {
 async function requestWithdrawal() {
   if (busy) return;
 
+  const amount = Number(document.getElementById('withdrawAmount').value);
+  const walletAddress = document.getElementById('walletAddress').value.trim();
+
+  if (!Number.isFinite(amount) || amount < CONFIG.MIN_WITHDRAWAL) {
+    return toast('Minimum withdrawal is 5 USDT.');
+  }
+
+  if (!/^0x[a-fA-F0-9]{40}$/.test(walletAddress)) {
+    return toast('Enter a valid BNB Smart Chain wallet address.');
+  }
+
+  if (!account || amount > Number(account.balance || 0)) {
+    return toast('Insufficient account balance.');
+  }
+
+  if (!account.canWithdraw) {
+    renderRequirements();
+    const reqCard = document.getElementById('reqCard');
+    if (reqCard && !reqCard.classList.contains('hidden')) reqCard.scrollIntoView({behavior:'smooth', block:'center'});
+    return toast(`Complete ${account.requiredAds} ads and ${account.requiredTasks} tasks first.`);
+  }
+
+  try {
+    busy = true;
+
+    const result = await api('/payout',{amount,walletAddress});
+
+    toast(result.message || 'Withdrawal request submitted. Transfer is not automatic.');
+
+    await loadAccount();
+    await loadPayoutHistory();
+  } catch (error) {
+    toast(error.message);
+  } finally {
+    busy = false;
+    updateAllAdButtons();
+  }
+}
+
+async function loadPayoutHistory() {
+  const container = document.getElementById('payoutHistory');
+
+  try {
+    const result = await api('/payouts');
+    const payouts = result.payouts || [];
+
+    if (!payouts.length) {
+      container.innerHTML = '<p class="small-note">No withdrawals yet.</p>';
+      return;
+    }
+
+    container.innerHTML = '';
+
+    payouts.forEach(payout => {
+      const item = document.createElement('div');
+      item.className = 'task';
+      item.innerHTML = `
+        <div class="task-icon">💸</div>
+        <div class="task-info">
+          <h3>${safeText(payout.status || 'pending')}</h3>
+          <p>${safeText(payout.created_at || '')}</p>
+        </div>
+        <div class="task-reward">$${formatMoney(payout.amount_usdt)}</div>`;
+      container.appendChild(item);
+    });
+  } catch (error) {
+    container.innerHTML = `<p class="small-note">${safeText(error.message || 'Could not load payout history.')}</p>`;
+  }
+}
+
+async function loadAccount() {
+  const result = await api('/sync',{
+    startParam:tg?.initDataUnsafe?.start_param || ''
+  });
+
+  account = result;
+  account._loadedAt = Date.now();
+
+  /* The server is the source of truth for ad slot locks. */
+  if (Array.isArray(result.adCooldowns)) {
+    const synced = {};
+    result.adCooldowns.forEach(slot => {
+      if (slot.locked && Number(slot.remainingSeconds) > 0) {
+        synced[slot.adId] = Date.now() + Number(slot.remainingSeconds) * 1000;
+      }
+    });
+    adCooldowns = synced;
+    saveLocalCooldowns();
+  }
+
+  document.getElementById('welcome').textContent =
+    'Welcome, ' + (result.user?.first_name || 'User') + '!';
+
+  document.getElementById('balance').textContent =
+    formatMoney(result.balance);
+
+  document.getElementById('withdrawBalance').textContent =
+    formatMoney(result.balance);
+
+  saveCachedBalance(result.balance);
+
+  document.getElementById('adsCount').textContent =
+    `${result.adsWatched || 0}/${CONFIG.MAX_ADS}`;
+
+  document.getElementById('refCount').textContent =
+    result.referrals || 0;
+
+  document.getElementById('referralCountLarge').textContent =
+    result.referrals || 0;
+
+  document.getElementById('taskCount').textContent =
+    `${Math.min(result.tasksCompleted || 0, result.requiredTasks || 2)}/${result.requiredTasks || 2}`;
+
+  document.getElementById('referralLink').textContent =
+    result.referralLink || 'Referral link unavailable';
+
+  renderSocialTasks();
+  renderRequirements();
   updateAllAdButtons();
 }
 
