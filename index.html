@@ -1224,10 +1224,10 @@ async function loadPayoutHistory() {
   }
 }
 
-async function loadAccount() {
-  const result = await api('/sync',{
-    startParam:tg?.initDataUnsafe?.start_param || ''
-  });
+async function loadAccount(path = '/sync') {
+  const result = await api(path, path === '/sync'
+    ? { startParam: tg?.initDataUnsafe?.start_param || '' }
+    : {});
 
   account = result;
   account._loadedAt = Date.now();
@@ -1275,6 +1275,38 @@ async function loadAccount() {
   updateAllAdButtons();
 }
 
+/* ---------- Automatic refresh: referrals, balance and tasks update by themselves ---------- */
+const AUTO_REFRESH_MS = 20000;
+let autoRefreshTimer = null;
+let autoRefreshRunning = false;
+
+async function autoRefreshAccount() {
+  if (autoRefreshRunning || busy || document.hidden || !tg?.initData || !account) return;
+
+  autoRefreshRunning = true;
+
+  try {
+    await loadAccount('/account');
+  } catch (_) {
+    /* Silent: the next refresh will try again. */
+  } finally {
+    autoRefreshRunning = false;
+  }
+}
+
+function startAutoRefresh() {
+  if (autoRefreshTimer) clearInterval(autoRefreshTimer);
+
+  autoRefreshTimer = setInterval(autoRefreshAccount, AUTO_REFRESH_MS);
+
+  /* Refresh right away when the user comes back to the app. */
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) autoRefreshAccount();
+  });
+
+  try { tg?.onEvent?.('activated', autoRefreshAccount); } catch (_) {}
+}
+
 async function initialize() {
   setCooldownStorageKey();
   loadCachedBalance();
@@ -1284,6 +1316,7 @@ async function initialize() {
   renderAds();
   renderSocialTasks();
   startCooldownTicker();
+  startAutoRefresh();
 
   if (!tg?.initData) {
     document.getElementById('welcome').textContent =
