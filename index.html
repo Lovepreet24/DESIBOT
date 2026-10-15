@@ -5,72 +5,36 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <meta name="theme-color" content="#080d1a">
 <title>NX USDT</title>
-
-<link rel="preconnect" href="https://nx-usdt-production.up.railway.app">
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-<script async src="https://sad.adsgram.ai/js/sad.min.js"></script>
-
+<script src="https://sad.adsgram.ai/js/sad.min.js"></script>
 <style>
-:root{
-  --bg:#080d1a;--panel:#111a2d;--panel2:#162139;
-  --gold:#f5c451;--gold2:#ffe29a;--text:#fff;
-  --muted:#98a5bd;--green:#3ddc97;
-  --border:rgba(255,255,255,.08)
-}
+:root{--bg:#080d1a;--panel:#111a2d;--panel2:#162139;--gold:#f5c451;--gold2:#ffe29a;--text:#fff;--muted:#98a5bd;--green:#3ddc97;--border:rgba(255,255,255,.08)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-body{
-  margin:0;
-  background:radial-gradient(ellipse at top,rgba(245,196,81,.09),transparent 55%),var(--bg);
-  color:var(--text);font-family:Arial,Helvetica,sans-serif;padding-bottom:95px
-}
-button,input{font:inherit}
-button{cursor:pointer}
-button:disabled{opacity:.65;cursor:not-allowed}
+body{margin:0;background:radial-gradient(ellipse at top,rgba(245,196,81,.09),transparent 55%),var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif;padding-bottom:95px}
+button,input{font:inherit}button{cursor:pointer}button:disabled{cursor:not-allowed;opacity:.55}
 .app{max-width:520px;margin:auto;padding:18px 15px}
 .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
 .brand{display:flex;align-items:center;gap:11px}
-.logo{
-  height:45px;width:45px;display:grid;place-items:center;border-radius:15px;
-  background:linear-gradient(135deg,#ffe39b,#d49b24);
-  color:#111827;font-weight:900;font-size:19px
-}
-.brand h1{font-size:21px;margin:0}
-.brand p{font-size:11px;color:var(--muted);margin:5px 0 0}
-.status{
-  display:flex;align-items:center;gap:5px;color:var(--green);
-  font-size:11px;background:rgba(61,220,151,.08);padding:8px 10px;border-radius:20px
-}
+.logo{height:45px;width:45px;display:grid;place-items:center;border-radius:15px;background:linear-gradient(135deg,#ffe39b,#d49b24);color:#111827;font-weight:900;font-size:19px}
+.brand h1{font-size:21px;margin:0}.brand p{font-size:11px;color:var(--muted);margin:5px 0 0}
+.status{display:flex;align-items:center;gap:5px;color:var(--green);font-size:11px;background:rgba(61,220,151,.08);padding:8px 10px;border-radius:20px}
 .dot{height:6px;width:6px;background:var(--green);border-radius:50%}
 .welcome{font-size:14px;color:var(--muted);margin:10px 0 15px}
-.balance-card{
-  background:linear-gradient(135deg,rgba(245,196,81,.17),rgba(17,26,45,.98) 58%);
-  border:1px solid rgba(245,196,81,.3);border-radius:23px;
-  padding:22px 20px;margin-bottom:16px
-}
-.balance-label{color:#d5dced;font-size:13px}
-.balance{font-size:37px;font-weight:900;margin:12px 0 7px;overflow-wrap:anywhere}
-.balance span{color:var(--gold);font-size:inherit}
-.chain-label{color:var(--muted);font-size:11px}
+.balance-card{background:linear-gradient(135deg,rgba(245,196,81,.17),rgba(17,26,45,.98) 58%);border:1px solid rgba(245,196,81,.3);border-radius:23px;padding:22px 20px;margin-bottom:16px}
+.balance-label{color:#d5dced;font-size:13px}.balance{font-size:37px;font-weight:900;margin:12px 0 7px;overflow-wrap:anywhere}
+.balance span{color:var(--gold);font-size:18px}.chain-label{color:var(--muted);font-size:11px}
 .balance-actions{display:flex;gap:10px;margin-top:21px}
 .btn{border:0;border-radius:12px;padding:12px 14px;font-weight:800;font-size:13px;flex:1}
 .btn-gold{background:linear-gradient(135deg,var(--gold2),#e8b536);color:#171717}
 .btn-dark{color:var(--gold);background:rgba(245,196,81,.08);border:1px solid rgba(245,196,81,.25)}
 .section-title{display:flex;align-items:center;justify-content:space-between;margin:24px 0 12px;gap:10px}
-.section-title h2{font-size:18px;margin:0}
-.section-title span{font-size:11px;color:var(--muted)}
+.section-title h2{font-size:18px;margin:0}.section-title span{font-size:11px;color:var(--muted)}
 .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
 .stat{background:var(--panel);border:1px solid var(--border);border-radius:15px;padding:14px 9px;min-width:0}
-.stat-icon{font-size:19px;margin-bottom:10px}
-.stat-value{font-weight:900;font-size:18px;overflow-wrap:anywhere}
+.stat-icon{font-size:19px;margin-bottom:10px}.stat-value{font-weight:900;font-size:18px;overflow-wrap:anywhere}
 .stat-label{font-size:10px;color:var(--muted);margin-top:5px}
-.reward-banner{
-  background:linear-gradient(110deg,#25213a,#182039);
-  border:1px solid rgba(245,196,81,.15);border-radius:17px;
-  padding:15px;margin-top:17px;display:flex;align-items:center;
-  justify-content:space-between;gap:12px
-}
-.reward-banner h3{font-size:14px;margin:0 0 6px}
-.reward-banner p{font-size:11px;color:var(--muted);margin:0;line-height:1.5}
+.reward-banner{background:linear-gradient(110deg,#25213a,#182039);border:1px solid rgba(245,196,81,.15);border-radius:17px;padding:15px;margin-top:17px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.reward-banner h3{font-size:14px;margin:0 0 6px}.reward-banner p{font-size:11px;color:var(--muted);margin:0;line-height:1.5}
 .reward-amount{font-size:22px;font-weight:900;color:var(--gold);white-space:nowrap}
 .tabs{display:flex;gap:8px;padding:5px;background:#0e1526;border:1px solid var(--border);border-radius:14px;margin:17px 0}
 .tab{flex:1;border:0;background:transparent;color:var(--muted);padding:12px 5px;font-weight:800;font-size:12px;border-radius:10px}
@@ -78,90 +42,42 @@ button:disabled{opacity:.65;cursor:not-allowed}
 .task-list{display:flex;flex-direction:column;gap:10px}
 .task{display:flex;align-items:center;gap:12px;padding:14px;background:var(--panel);border:1px solid var(--border);border-radius:16px}
 .task-icon{flex-shrink:0;height:43px;width:43px;border-radius:13px;display:grid;place-items:center;background:var(--panel2);font-size:21px}
-.task-info{flex:1;min-width:0}
-.task-info h3{font-size:13px;margin:0 0 6px}
+.task-info{flex:1;min-width:0}.task-info h3{font-size:13px;margin:0 0 6px}
 .task-info p{font-size:11px;color:var(--muted);margin:0;line-height:1.45}
 .task-reward{font-size:12px;font-weight:900;color:var(--gold);margin-bottom:8px;text-align:right;white-space:nowrap}
 .task-btn{border:0;border-radius:8px;padding:9px 10px;font-size:10px;font-weight:900;min-width:83px}
 .task-btn.start{background:var(--gold);color:#151515}
 .task-btn.pending{background:#5a4925;color:#ffe39b}
 .task-btn.claimed{background:rgba(61,220,151,.13);color:var(--green)}
-.task-btn.cooldown{background:#242d40;color:#aab5c8;min-width:100px;font-size:10px}
 .task-btn.soon{background:#242d40;color:#aab5c8}
-.task-btns{display:flex;gap:6px;justify-content:flex-end}
-.task-btns .task-btn{min-width:64px}
-.task-btn.verify{background:var(--green);color:#0b1a12}
 .small-note{font-size:11px;line-height:1.6;color:var(--muted);margin:12px 2px}
-.req-card{background:var(--panel);border:1px solid var(--border);border-radius:19px;padding:18px;margin-top:15px}
-.req-kicker{font-size:10px;font-weight:800;letter-spacing:.08em;color:var(--muted)}
-.req-title{font-size:18px;margin:8px 0 14px}
-.req-list{display:flex;flex-direction:column;gap:10px}
-.req-item{display:flex;align-items:center;gap:12px;padding:12px;background:var(--panel2);border:1px solid var(--border);border-radius:14px}
-.req-icon{font-size:24px;flex-shrink:0}
-.req-info{flex:1;min-width:0}
-.req-info h4{margin:0 0 4px;font-size:13px}
-.req-info p{margin:0;font-size:11px;color:var(--muted)}
-.req-item.done .req-info h4{color:var(--green)}
-.req-btn{border:0;border-radius:10px;padding:10px 12px;font-size:11px;font-weight:900;background:rgba(61,220,151,.13);color:var(--green);white-space:nowrap}
-.panel{display:none}
-.panel.active{display:block}
+.panel{display:none}.panel.active{display:block}
 .ref-card,.withdraw-card{background:var(--panel);border:1px solid var(--border);border-radius:19px;padding:18px;margin-top:15px}
 .ref-card h3,.withdraw-card h3{margin:0 0 8px;font-size:16px}
 .ref-card p,.withdraw-card p{color:var(--muted);font-size:12px;line-height:1.6}
 .ref-url{word-break:break-all;background:#0a1120;border:1px solid var(--border);border-radius:10px;padding:12px;font-size:11px;line-height:1.5;margin:14px 0}
 .input{width:100%;background:#0a1120;color:white;border:1px solid #293650;padding:13px;border-radius:11px;outline:none;margin:8px 0;font-size:13px}
 .input:focus{border-color:var(--gold)}
-.bottom-nav{
-  position:fixed;bottom:0;left:0;right:0;z-index:20;
-  display:flex;justify-content:center;background:rgba(8,13,26,.97);
-  backdrop-filter:blur(16px);border-top:1px solid var(--border);
-  padding:10px 6px calc(10px + env(safe-area-inset-bottom))
-}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:20;display:flex;justify-content:center;background:rgba(8,13,26,.97);backdrop-filter:blur(16px);border-top:1px solid var(--border);padding:10px 6px calc(10px + env(safe-area-inset-bottom))}
 .nav-inner{width:100%;max-width:520px;display:flex;justify-content:space-around}
 .nav-btn{flex:1;border:0;background:transparent;color:var(--muted);font-size:10px;font-weight:700;padding:6px 2px}
-.nav-icon{display:block;font-size:20px;margin-bottom:5px}
-.nav-btn.active{color:var(--gold)}
-.toast{
-  position:fixed;left:15px;right:15px;bottom:90px;z-index:50;
-  background:#202b41;color:white;padding:14px;border-radius:12px;
-  font-size:12px;text-align:center;display:none
-}
-.toast.show{display:block}
-.popup{
-  position:fixed;top:0;left:0;right:0;bottom:0;z-index:100;
-  display:flex;align-items:center;justify-content:center;
-  padding:24px;background:rgba(0,0,0,.65)
-}
-.popup-box{
-  width:100%;max-width:320px;background:var(--panel);
-  border:1px solid rgba(245,196,81,.3);border-radius:18px;
-  padding:22px 18px;text-align:center
-}
-.popup-box p{margin:0 0 18px;font-size:14px;line-height:1.6}
-.hidden{display:none!important}
+.nav-icon{display:block;font-size:20px;margin-bottom:5px}.nav-btn.active{color:var(--gold)}
+.toast{position:fixed;left:15px;right:15px;bottom:90px;z-index:50;background:#202b41;color:white;padding:14px;border-radius:12px;font-size:12px;text-align:center;display:none}
+.toast.show{display:block}.hidden{display:none!important}
 </style>
 </head>
-
 <body>
 <main class="app">
-
 <header class="header">
-  <div class="brand">
-    <div class="logo">NX</div>
-    <div>
-      <h1>NX <span style="color:var(--gold)">USDT</span></h1>
-      <p>Watch • Complete • Earn</p>
-    </div>
-  </div>
+  <div class="brand"><div class="logo">NX</div><div><h1>NX <span style="color:var(--gold)">USDT</span></h1><p>Watch • Complete • Earn</p></div></div>
   <div class="status"><span class="dot"></span>Mini App</div>
 </header>
-
 <p class="welcome" id="welcome">Welcome to NX USDT</p>
 
 <section id="homePanel" class="panel active">
   <div class="balance-card">
     <div class="balance-label">Available Balance</div>
-    <div class="balance">$<span id="balance">...</span></div>
+    <div class="balance">$<span id="balance">0.00</span></div>
     <div class="chain-label">USDT • BNB Smart Chain (BEP-20)</div>
     <div class="balance-actions">
       <button class="btn btn-gold" onclick="goTo('withdraw')">Withdraw</button>
@@ -170,12 +86,21 @@ button:disabled{opacity:.65;cursor:not-allowed}
   </div>
 
   <div class="stats">
-    <div class="stat"><div class="stat-icon">📺</div><div class="stat-value" id="adsCount">0/12</div><div class="stat-label">Ads (8h)</div></div>
+    <div class="stat"><div class="stat-icon">📺</div><div class="stat-value" id="adsCount">0/12</div><div class="stat-label">Ads Today</div></div>
     <div class="stat"><div class="stat-icon">👥</div><div class="stat-value" id="refCount">0</div><div class="stat-label">Referrals</div></div>
     <div class="stat"><div class="stat-icon">📋</div><div class="stat-value" id="taskCount">0/2</div><div class="stat-label">Tasks Approved</div></div>
   </div>
 
+  <div class="reward-banner">
+    <div><h3>🎁 Welcome Bonus</h3><p>New account bonus, credited once.</p></div>
+    <div class="reward-amount">$10</div>
+  </div>
+
   <div class="section-title"><h2>Start Earning</h2><span>Earn USDT</span></div>
+
+  <div class="section-title"><h2>Official Tasks</h2><span>Join both channels</span></div>
+  <div class="task-list" id="homeOfficialTasks"></div>
+
   <div class="ref-card">
     <h3>📺 Watch Ads &amp; Complete Tasks</h3>
     <p>Earn through available ads and social tasks. Check your eligibility and task status on the Earn page.</p>
@@ -189,17 +114,15 @@ button:disabled{opacity:.65;cursor:not-allowed}
     <button class="tab active" id="watchTab" onclick="switchEarnTab('ads')">📺 Watch Ads</button>
     <button class="tab" id="socialTab" onclick="switchEarnTab('social')">📋 Social Tasks</button>
   </div>
-
   <div id="adsPanel">
     <div class="task-list" id="adsList"></div>
-    <p class="small-note">Each verified ad reward: $0.25 USDT. Each ad slot has its own 8-hour cooldown after a successful reward.</p>
+    <p class="small-note">Each verified ad reward: $0.25 USDT. Maximum 12 ads per rolling 24 hours. Rewards require server-side verification.</p>
   </div>
-
   <div id="socialPanel" class="hidden">
     <div class="task-list" id="socialList"></div>
-    <div class="section-title"><h2>YouTube Tasks</h2></div>
+    <div class="section-title"><h2>YouTube Tasks</h2><span>Coming soon</span></div>
     <div class="task-list" id="youtubeList"></div>
-    <p class="small-note">For Telegram and YouTube tasks, press START, complete the task, then press VERIFY. YouTube tasks can be done again after 24 hours.</p>
+    <p class="small-note">Telegram tasks require server-side membership verification. YouTube tasks are not active yet.</p>
   </div>
 </section>
 
@@ -207,11 +130,8 @@ button:disabled{opacity:.65;cursor:not-allowed}
   <div class="section-title"><h2>Refer &amp; Earn</h2><span>Invite friends</span></div>
   <div class="ref-card">
     <h3>💰 Earn $5 USDT per referral</h3>
-    <p>Share your personal invitation link. Referral rewards are credited once for eligible new registrations.</p>
-    <div class="reward-banner">
-      <div><h3>Your Referrals</h3><p>Successful registrations</p></div>
-      <div class="reward-amount" id="referralCountLarge">0</div>
-    </div>
+    <p>Share your personal invitation link. The referral reward is credited once for an eligible new registration.</p>
+    <div class="reward-banner"><div><h3>Your Referrals</h3><p>Successful registrations</p></div><div class="reward-amount" id="referralCountLarge">0</div></div>
     <div class="ref-url" id="referralLink">Loading referral link...</div>
     <button class="btn btn-gold" style="width:100%" onclick="copyReferral()">Copy Referral Link</button>
     <button class="btn btn-dark" style="width:100%;margin-top:10px" onclick="shareReferral()">Share with Friends</button>
@@ -222,28 +142,18 @@ button:disabled{opacity:.65;cursor:not-allowed}
   <div class="section-title"><h2>Withdraw USDT</h2><span>BEP-20</span></div>
   <div class="withdraw-card">
     <h3>💸 Request Withdrawal</h3>
-    <p>Minimum withdrawal: $5 USDT. Complete the required ads and tasks before requesting.</p>
-    <div class="reward-banner">
-      <div><h3>Available Balance</h3><p>NX USDT account balance</p></div>
-      <div class="reward-amount">$<span id="withdrawBalance">...</span></div>
-    </div>
+    <p>Minimum withdrawal: $5 USDT. Complete the required verified ads and approved Telegram tasks before requesting.</p>
+    <div class="reward-banner"><div><h3>Available Balance</h3><p>NX USDT account balance</p></div><div class="reward-amount">$<span id="withdrawBalance">0.00</span></div></div>
     <label for="withdrawAmount" class="small-note">Amount (USDT)</label>
     <input class="input" id="withdrawAmount" type="number" min="5" step="0.01" placeholder="Minimum 5 USDT">
-    <label for="walletAddress" class="small-note">Submit your USDT (BEP20) Address From Trust Wallet</label>
+    <label for="walletAddress" class="small-note">BNB Smart Chain wallet address</label>
     <input class="input" id="walletAddress" type="text" placeholder="0x..." autocomplete="off">
     <button class="btn btn-gold" style="width:100%;margin-top:12px" onclick="requestWithdrawal()">Request Withdrawal</button>
-    <p class="small-note">Payouts are sent automatically to your BEP-20 wallet after a quick check.</p>
-    <p class="small-note">We only recommend to use USDT (BEP-20) Wallet address from Trust Wallet only!</p>
-  </div>
-  <div id="reqCard" class="req-card hidden">
-    <div class="req-kicker">WITHDRAWAL REQUIREMENTS</div>
-    <h3 class="req-title">Pending requirements</h3>
-    <div id="reqList" class="req-list"></div>
+    <p class="small-note">Withdrawal requests are saved for manual processing. Automatic payouts are not enabled.</p>
   </div>
   <div class="section-title"><h2>Withdrawal History</h2></div>
   <div id="payoutHistory" class="task-list"><p class="small-note">No history loaded.</p></div>
 </section>
-
 </main>
 
 <nav class="bottom-nav">
@@ -254,15 +164,7 @@ button:disabled{opacity:.65;cursor:not-allowed}
     <button class="nav-btn" data-page="withdraw" onclick="goTo('withdraw')"><span class="nav-icon">💸</span>Withdraw</button>
   </div>
 </nav>
-
 <div id="toast" class="toast"></div>
-
-<div id="popup" class="popup hidden">
-  <div class="popup-box">
-    <p id="popupText"></p>
-    <button class="btn btn-gold" style="width:100%" onclick="closePopup()">OK</button>
-  </div>
-</div>
 
 <script>
 'use strict';
@@ -277,22 +179,10 @@ const CONFIG = {
   MAX_ADS: 12,
   TASK_REWARD: 0.25,
   YOUTUBE_TASKS: 4,
-  MIN_WITHDRAWAL: 5,
-  AD_COOLDOWN_HOURS: 8,
-  AD_COOLDOWN_MS: 8 * 60 * 60 * 1000,
-  /* Ad slots where the "Go!" click is NOT required (watching the full ad is enough). */
-  NO_CLICK_ADS: [1]
+  MIN_WITHDRAWAL: 5
 };
 
 const tg = window.Telegram?.WebApp;
-let account = null;
-let busy = false;
-let toastTimer = null;
-let adsgramController = null;
-let cooldownTimer = null;
-let adCooldowns = {};
-let cooldownStorageKey = 'nxusdt_ad_cooldowns_v1';
-
 if (tg) {
   tg.ready();
   tg.expand();
@@ -302,33 +192,58 @@ if (tg) {
   } catch (_) {}
 }
 
+let account = null;
+let busy = false;
+let toastTimer = null;
+let adsgramController = null;
+let lastAdsCount = 0;
+const startedTasks = {};
+
+const SOCIAL_TASKS = [
+  {
+    key: 'telegram_earn',
+    title: 'Join NX USDT Channel',
+    description: 'Join the official earning channel.',
+    icon: '📢',
+    url: CONFIG.MAIN_CHANNEL
+  },
+  {
+    key: 'telegram_payout',
+    title: 'Join Payout Channel',
+    description: 'Receive payout announcements.',
+    icon: '💸',
+    url: CONFIG.PAYOUT_CHANNEL
+  }
+];
+
 async function api(path, body = {}) {
   if (!tg?.initData) {
-    throw new Error('Please open NX USDT through Telegram.');
+    throw Error('Please open NX USDT through Telegram.');
   }
 
   let response;
-
   try {
-    response = await fetch(CONFIG.API_BASE + path, {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({...body, initData:tg.initData})
-    });
+    response = await fetch(
+      CONFIG.API_BASE.replace(/\/+$/, '') + path,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...body, initData: tg.initData })
+      }
+    );
   } catch (_) {
-    throw new Error('Network error. Check your internet and backend.');
+    throw Error('Could not connect to backend. Check internet and backend URL.');
   }
 
   let result;
-
   try {
     result = await response.json();
   } catch (_) {
-    throw new Error('Invalid response from backend.');
+    throw Error('Backend returned an invalid response.');
   }
 
   if (!response.ok || result.success === false) {
-    throw new Error(result.error || `Request failed (${response.status}).`);
+    throw Error(result.error || `Request failed (${response.status}).`);
   }
 
   return result;
@@ -339,24 +254,11 @@ function toast(message) {
   el.textContent = message;
   el.classList.add('show');
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => el.classList.remove('show'), 4000);
-}
-
-/* Centered popup: the user must press OK to close it. */
-function showPopup(message) {
-  document.getElementById('popupText').textContent = message;
-  document.getElementById('popup').classList.remove('hidden');
-  if (tg?.HapticFeedback) {
-    try { tg.HapticFeedback.notificationOccurred('warning'); } catch (_) {}
-  }
-}
-
-function closePopup() {
-  document.getElementById('popup').classList.add('hidden');
+  toastTimer = setTimeout(() => el.classList.remove('show'), 3500);
 }
 
 function goTo(page) {
-  if (!['home','earn','refer','withdraw'].includes(page)) page = 'home';
+  if (!['home', 'earn', 'refer', 'withdraw'].includes(page)) page = 'home';
 
   document.querySelectorAll('.panel').forEach(el => el.classList.remove('active'));
   document.getElementById(page + 'Panel').classList.add('active');
@@ -366,168 +268,32 @@ function goTo(page) {
   });
 
   if (tg?.HapticFeedback) tg.HapticFeedback.selectionChanged();
-  if (page === 'withdraw') {
-    loadPayoutHistory();
-    refreshAccountQuiet();
-  }
+  if (page === 'withdraw') loadPayoutHistory();
 
-  window.scrollTo({top:0,behavior:'smooth'});
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function switchEarnTab(tab) {
   const ads = tab === 'ads';
-
-  document.getElementById('adsPanel').classList.toggle('hidden',!ads);
-  document.getElementById('socialPanel').classList.toggle('hidden',ads);
-  document.getElementById('watchTab').classList.toggle('active',ads);
-  document.getElementById('socialTab').classList.toggle('active',!ads);
+  document.getElementById('adsPanel').classList.toggle('hidden', !ads);
+  document.getElementById('socialPanel').classList.toggle('hidden', ads);
+  document.getElementById('watchTab').classList.toggle('active', ads);
+  document.getElementById('socialTab').classList.toggle('active', !ads);
 }
 
 function safeText(value) {
-  return String(value ?? '').replace(/[&<>"']/g, c => ({
-    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
-  })[c]);
+  return String(value ?? '').replace(/[&<>"']/g, char => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
+  }[char]));
 }
 
 function formatMoney(value) {
-  const n = Number(value || 0);
-  return Number.isFinite(n) ? n.toFixed(2) : '0.00';
-}
-
-/* The last known balance is saved on the phone so it shows instantly when the app opens. */
-let balanceCacheKey = 'nxusdt_balance_v1';
-
-function loadCachedBalance() {
-  try {
-    const userId = tg?.initDataUnsafe?.user?.id;
-    balanceCacheKey = 'nxusdt_balance_v1_' + (userId || 'telegram');
-
-    const saved = localStorage.getItem(balanceCacheKey);
-
-    if (saved !== null && saved !== '') {
-      const text = formatMoney(saved);
-      document.getElementById('balance').textContent = text;
-      document.getElementById('withdrawBalance').textContent = text;
-    }
-  } catch (_) {}
-}
-
-function saveCachedBalance(value) {
-  try {
-    localStorage.setItem(balanceCacheKey, String(Number(value || 0)));
-  } catch (_) {}
-}
-
-/* Cooldown storage is keyed by Telegram account and ad slot. */
-function setCooldownStorageKey() {
-  const userId = tg?.initDataUnsafe?.user?.id;
-  cooldownStorageKey = 'nxusdt_ad_cooldowns_v1_' + (userId || 'telegram');
-}
-
-function loadLocalCooldowns() {
-  try {
-    const saved = JSON.parse(localStorage.getItem(cooldownStorageKey) || '{}');
-    const now = Date.now();
-    adCooldowns = {};
-
-    for (let id = 1; id <= CONFIG.MAX_ADS; id++) {
-      const until = Number(saved[id] || 0);
-      if (until > now) adCooldowns[id] = until;
-    }
-
-    saveLocalCooldowns();
-  } catch (error) {
-    console.warn('Could not read ad cooldowns:', error);
-    adCooldowns = {};
-  }
-}
-
-function saveLocalCooldowns() {
-  try {
-    localStorage.setItem(cooldownStorageKey, JSON.stringify(adCooldowns));
-  } catch (error) {
-    console.warn('Could not save ad cooldowns:', error);
-  }
-}
-
-function startAdCooldown(adId, timestamp = Date.now()) {
-  adCooldowns[adId] = Number(timestamp) + CONFIG.AD_COOLDOWN_MS;
-  saveLocalCooldowns();
-  updateAdButton(adId);
-}
-
-function getRemainingMs(adId) {
-  const until = Number(adCooldowns[adId] || 0);
-  const remaining = until - Date.now();
-
-  if (remaining <= 0) {
-    if (until) {
-      delete adCooldowns[adId];
-      saveLocalCooldowns();
-    }
-    return 0;
-  }
-
-  return remaining;
-}
-
-function formatCountdown(ms) {
-  const totalSeconds = Math.max(0, Math.ceil(ms / 1000));
-  const hours = Math.floor(totalSeconds / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
-  const seconds = totalSeconds % 60;
-
-  return String(hours).padStart(2,'0') + ':' +
-         String(minutes).padStart(2,'0') + ':' +
-         String(seconds).padStart(2,'0');
-}
-
-function updateAdButton(adId) {
-  const button = document.getElementById('adBtn' + adId);
-  if (!button) return;
-
-  const remaining = getRemainingMs(adId);
-
-  if (remaining > 0) {
-    button.disabled = true;
-    button.className = 'task-btn cooldown';
-    button.textContent = formatCountdown(remaining);
-    button.title = 'This ad slot will be available after its ' + CONFIG.AD_COOLDOWN_HOURS + '-hour cooldown.';
-  } else {
-    button.disabled = Boolean(busy);
-    button.className = 'task-btn start';
-    button.textContent = 'WATCH';
-    button.title = 'Watch this advertisement.';
-  }
-}
-
-function updateAllAdButtons() {
-  for (let id = 1; id <= CONFIG.MAX_ADS; id++) {
-    updateAdButton(id);
-  }
-}
-
-/* Ticks task countdown buttons (YouTube 24h repeat). Re-renders when one expires. */
-function updateTaskCountdowns() {
-  let expired = false;
-
-  document.querySelectorAll('[data-until]').forEach(el => {
-    const remaining = Number(el.dataset.until) - Date.now();
-
-    if (remaining <= 0) expired = true;
-    else el.textContent = formatCountdown(remaining);
-  });
-
-  if (expired) renderYoutubeTasks();
-}
-
-function startCooldownTicker() {
-  if (cooldownTimer) clearInterval(cooldownTimer);
-
-  cooldownTimer = setInterval(() => {
-    updateAllAdButtons();
-    updateTaskCountdowns();
-  }, 1000);
+  const number = Number(value || 0);
+  return Number.isFinite(number) ? number.toFixed(2) : '0.00';
 }
 
 function renderAds() {
@@ -541,7 +307,7 @@ function renderAds() {
       <div class="task-icon">📺</div>
       <div class="task-info">
         <h3>Watch Ad #${adId}</h3>
-        <p id="adStatus${adId}">Complete one advertisement</p>
+        <p>Complete one advertisement</p>
       </div>
       <div>
         <div class="task-reward">+$${formatMoney(CONFIG.AD_REWARD)}</div>
@@ -549,51 +315,79 @@ function renderAds() {
       </div>`;
     list.appendChild(item);
   }
-
-  updateAllAdButtons();
 }
 
-const SOCIAL_TASKS = [
-  {key:'telegram_earn',title:'Join NX USDT Channel',description:'Join the official earning channel.',icon:'📢',url:CONFIG.MAIN_CHANNEL},
-  {key:'telegram_payout',title:'Join Payout Channel',description:'Receive payout announcements.',icon:'💸',url:CONFIG.PAYOUT_CHANNEL}
-];
+function renderTelegramTasks() {
+  const containers = [
+    document.getElementById('homeOfficialTasks'),
+    document.getElementById('socialList')
+  ].filter(Boolean);
 
-const YOUTUBE_TASKS = [
-  {key:'youtube_1',title:'YouTube Task #1',description:'Press START, watch full video, then VERIFY.',icon:'▶️',url:'https://youtu.be/s9CRZvf2oHI?si=WJsPvPmfuDHsm1wo'},
-  {key:'youtube_2',title:'YouTube Task #2',description:'Press START, watch full video, then VERIFY.',icon:'▶️',url:'https://youtu.be/HnWKOEg-2do?si=IEcVjlDAVZlap968'},
-  {key:'youtube_3',title:'YouTube Task #3',description:'Press START, watch full video, then VERIFY.',icon:'▶️',url:'https://youtu.be/daFDByPcNL4?si=m_XDOMOW8xihIXYu'},
-  {key:'youtube_4',title:'YouTube Task #4',description:'Press START, watch full video, then VERIFY.',icon:'▶️',url:'https://youtu.be/3JRt5cT9mFg?si=WbUBQdQpRTWYymGx'}
-];
+  containers.forEach(list => {
+    list.innerHTML = '';
 
-const ALL_TASKS = [...SOCIAL_TASKS, ...YOUTUBE_TASKS];
+    SOCIAL_TASKS.forEach(task => {
+      const status = account?.taskStatus?.[task.key];
+      let label = 'JOIN';
+      let css = 'start';
+      let disabled = false;
+      let action = `startTelegramTask('${task.key}')`;
 
-function renderTaskList(containerId, tasks) {
-  const list = document.getElementById(containerId);
+      if (status === 'approved') {
+        label = 'DONE ✓';
+        css = 'claimed';
+        disabled = true;
+        action = '';
+      } else if (status === 'pending') {
+        label = 'PENDING';
+        css = 'pending';
+        disabled = true;
+        action = '';
+      } else if (startedTasks[task.key]) {
+        label = 'DONE';
+        css = 'start';
+        action = `verifyTelegramTask('${task.key}')`;
+      }
+
+      const item = document.createElement('div');
+      item.className = 'task';
+
+      item.innerHTML = `
+        <div class="task-icon">${task.icon}</div>
+        <div class="task-info">
+          <h3>${safeText(task.title)}</h3>
+          <p>${safeText(task.description)}</p>
+        </div>
+        <div>
+          <div class="task-reward">+$${formatMoney(CONFIG.TASK_REWARD)}</div>
+          <button class="task-btn ${css}" ${disabled ? 'disabled' : ''}
+            ${action ? `onclick="${action}"` : ''}>${label}</button>
+        </div>`;
+
+      list.appendChild(item);
+    });
+  });
+}
+
+function renderYoutubeTasks() {
+  const list = document.getElementById('youtubeList');
   list.innerHTML = '';
 
-  tasks.forEach(task => {
-    const status = account?.taskStatus?.[task.key];
-    let label = 'START', css = 'start', disabled = false;
-
-    if (status === 'pending') { label = 'PENDING'; css = 'pending'; disabled = true; }
-    else if (status === 'approved') { label = 'APPROVED'; css = 'claimed'; disabled = true; }
-    else if (status === 'rejected') { label = 'RETRY'; }
-
+  for (let i = 1; i <= CONFIG.YOUTUBE_TASKS; i++) {
     const item = document.createElement('div');
     item.className = 'task';
     item.innerHTML = `
-      <div class="task-icon">${task.icon}</div>
+      <div class="task-icon">▶️</div>
       <div class="task-info">
-        <h3>${safeText(task.title)}</h3>
-        <p>${safeText(task.description)}</p>
+        <h3>YouTube Task #${i}</h3>
+        <p>Video task will be available later.</p>
       </div>
       <div>
         <div class="task-reward">+$${formatMoney(CONFIG.TASK_REWARD)}</div>
-        <button class="task-btn ${css}" ${disabled?'disabled':''}
-          onclick="submitSocialTask('${task.key}')">${label}</button>
+        <button class="task-btn soon" disabled>COMING SOON</button>
       </div>`;
     list.appendChild(item);
-  });
+  }
 }
 
 function renderSocialTasks() {
@@ -601,512 +395,153 @@ function renderSocialTasks() {
   renderYoutubeTasks();
 }
 
-/* ---------- Telegram channel tasks: START -> VERIFY (no timer) ---------- */
-let tgState = {};
-let tgStorageKey = 'nxusdt_tg_tasks_v1';
-
-function loadTgState() {
-  try {
-    const userId = tg?.initDataUnsafe?.user?.id;
-    tgStorageKey = 'nxusdt_tg_tasks_v1_' + (userId || 'telegram');
-    tgState = JSON.parse(localStorage.getItem(tgStorageKey) || '{}');
-  } catch (_) {
-    tgState = {};
-  }
-}
-
-function saveTgState() {
-  try { localStorage.setItem(tgStorageKey, JSON.stringify(tgState)); } catch (_) {}
-}
-
-function resetTelegramTask(taskKey) {
-  delete tgState[taskKey];
-  saveTgState();
-  renderTelegramTasks();
-}
-
-function renderTelegramTasks() {
-  const list = document.getElementById('socialList');
-  list.innerHTML = '';
-
-  const autoVerify = account?.config?.autoVerifyTasks !== false;
-
-  SOCIAL_TASKS.forEach(task => {
-    const status = account?.taskStatus?.[task.key];
-    const started = Boolean(tgState[task.key]);
-    let buttons;
-
-    if (status === 'approved') {
-      buttons = `<button class="task-btn claimed" disabled>APPROVED</button>`;
-    } else if (status === 'pending' && !autoVerify) {
-      buttons = `<button class="task-btn pending" disabled>PENDING</button>`;
-    } else if (started) {
-      buttons = `<div class="task-btns">
-        <button class="task-btn start" disabled>START</button>
-        <button class="task-btn verify" onclick="verifyTelegramTask('${task.key}')">VERIFY</button>
-      </div>`;
-    } else {
-      buttons = `<button class="task-btn start" onclick="startTelegramTask('${task.key}')">START</button>`;
-    }
-
-    const item = document.createElement('div');
-    item.className = 'task';
-    item.innerHTML = `
-      <div class="task-icon">${task.icon}</div>
-      <div class="task-info">
-        <h3>${safeText(task.title)}</h3>
-        <p>${safeText(task.description)}</p>
-      </div>
-      <div>
-        <div class="task-reward">+$${formatMoney(CONFIG.TASK_REWARD)}</div>
-        ${buttons}
-      </div>`;
-    list.appendChild(item);
-  });
-}
-
 function startTelegramTask(taskKey) {
-  if (busy) return;
-
-  const task = SOCIAL_TASKS.find(t => t.key === taskKey);
+  const task = SOCIAL_TASKS.find(item => item.key === taskKey);
   if (!task) return toast('Task not found.');
 
-  if (task.url.startsWith('https://t.me') && tg?.openTelegramLink) tg.openTelegramLink(task.url);
-  else if (tg?.openLink) tg.openLink(task.url);
-  else window.open(task.url, '_blank', 'noopener');
+  const status = account?.taskStatus?.[taskKey];
+  if (status === 'approved') return toast('This task is already completed.');
+  if (status === 'pending') return toast('This task is pending.');
 
-  tgState[taskKey] = { startedAt: Date.now() };
-  saveTgState();
+  startedTasks[taskKey] = true;
   renderTelegramTasks();
 
-  toast('Join the channel, then come back and press VERIFY.');
+  if (tg?.openTelegramLink) {
+    tg.openTelegramLink(task.url);
+  } else {
+    window.open(task.url, '_blank', 'noopener');
+  }
+
+  toast('Channel open ho gaya. Join karke Mini App par wapas aao aur DONE dabao.');
 }
 
 async function verifyTelegramTask(taskKey) {
   if (busy) return;
 
-  if (!tgState[taskKey]) return renderTelegramTasks();
+  const task = SOCIAL_TASKS.find(item => item.key === taskKey);
+  if (!task) return toast('Task not found.');
+
+  if (!startedTasks[taskKey]) {
+    return toast('Pehle JOIN button dabao.');
+  }
+
+  if (account?.taskStatus?.[taskKey] === 'approved') {
+    return toast('Task already completed.');
+  }
 
   try {
     busy = true;
+    toast('Checking Telegram channel membership...');
+
     const result = await api('/tasks/submit', { taskKey });
 
-    delete tgState[taskKey];
-    saveTgState();
-
-    toast(result.message || 'Task verified.');
     await loadAccount();
-  } catch (error) {
-    resetTelegramTask(taskKey);
-    toast(error.message || 'Verification failed. Press START again.');
-  } finally {
-    busy = false;
-    updateAllAdButtons();
-  }
-}
 
-/* ---------- YouTube tasks: START -> wait 35s -> VERIFY (repeat after 24h) ---------- */
-const YT_WATCH_SECONDS = 35;
-let ytState = {};
-let ytStorageKey = 'nxusdt_yt_tasks_v1';
-
-function loadYtState() {
-  try {
-    const userId = tg?.initDataUnsafe?.user?.id;
-    ytStorageKey = 'nxusdt_yt_tasks_v1_' + (userId || 'telegram');
-    ytState = JSON.parse(localStorage.getItem(ytStorageKey) || '{}');
-  } catch (_) {
-    ytState = {};
-  }
-}
-
-function saveYtState() {
-  try { localStorage.setItem(ytStorageKey, JSON.stringify(ytState)); } catch (_) {}
-}
-
-function resetYoutubeTask(taskKey) {
-  delete ytState[taskKey];
-  saveYtState();
-  renderYoutubeTasks();
-}
-
-function renderYoutubeTasks() {
-  const list = document.getElementById('youtubeList');
-  list.innerHTML = '';
-
-  const autoApprove = account?.config?.youtubeAutoApprove !== false;
-
-  YOUTUBE_TASKS.forEach(task => {
-    const status = account?.taskStatus?.[task.key];
-    const started = Boolean(ytState[task.key]);
-
-    /* Approved tasks show a 24h countdown, then become available again. */
-    const cooldown = account?.taskCooldowns?.[task.key];
-    const lockedUntil = cooldown
-      ? (account._loadedAt || Date.now()) + Number(cooldown.remainingSeconds || 0) * 1000
-      : 0;
-    const locked = status === 'approved' && lockedUntil > Date.now();
-    const available = status === 'approved' && cooldown && !locked;
-
-    let buttons;
-
-    if (locked) {
-      buttons = `<button class="task-btn cooldown" disabled data-until="${lockedUntil}">${formatCountdown(lockedUntil - Date.now())}</button>`;
-    } else if (status === 'approved' && !available) {
-      buttons = `<button class="task-btn claimed" disabled>APPROVED</button>`;
-    } else if (status === 'pending' && !autoApprove) {
-      buttons = `<button class="task-btn pending" disabled>PENDING</button>`;
-    } else if (started) {
-      buttons = `<div class="task-btns">
-        <button class="task-btn start" disabled>START</button>
-        <button class="task-btn verify" onclick="verifyYoutubeTask('${task.key}')">VERIFY</button>
-      </div>`;
+    if (account?.taskStatus?.[taskKey] === 'approved') {
+      delete startedTasks[taskKey];
+      renderTelegramTasks();
+      toast('DONE ✓ Channel membership verified!');
+    } else if (account?.taskStatus?.[taskKey] === 'pending') {
+      toast(result.message || 'Task submitted and is pending verification.');
     } else {
-      buttons = `<button class="task-btn start" onclick="startYoutubeTask('${task.key}')">START</button>`;
+      toast(result.message || 'Membership not verified yet. Join the channel and try DONE again.');
     }
-
-    const item = document.createElement('div');
-    item.className = 'task';
-    item.innerHTML = `
-      <div class="task-icon">${task.icon}</div>
-      <div class="task-info">
-        <h3>${safeText(task.title)}</h3>
-        <p>${safeText(task.description)}</p>
-      </div>
-      <div>
-        <div class="task-reward">+$${formatMoney(CONFIG.TASK_REWARD)}</div>
-        ${buttons}
-      </div>`;
-    list.appendChild(item);
-  });
-}
-
-async function startYoutubeTask(taskKey) {
-  if (busy) return;
-
-  const task = YOUTUBE_TASKS.find(t => t.key === taskKey);
-  if (!task) return toast('Task not found.');
-
-  /* Open the video first, while the tap is still a direct user action. */
-  if (tg?.openLink) tg.openLink(task.url);
-  else window.open(task.url, '_blank', 'noopener');
-
-  try {
-    busy = true;
-    const result = await api('/tasks/youtube/start', { taskKey });
-
-    ytState[taskKey] = { token: result.token, startedAt: Date.now() };
-    saveYtState();
-    renderYoutubeTasks();
-
-    toast('Watch the full video, then press VERIFY.');
   } catch (error) {
-    toast(error.message);
+    // Keep the started state so the user can retry DONE after joining.
+    toast(error.message || 'Verification failed. Join the channel and try again.');
   } finally {
     busy = false;
+    renderTelegramTasks();
   }
 }
 
-async function verifyYoutubeTask(taskKey) {
-  if (busy) return;
-
-  const state = ytState[taskKey];
-  if (!state) return renderYoutubeTasks();
-
-  const elapsed = (Date.now() - state.startedAt) / 1000;
-
-  if (elapsed < YT_WATCH_SECONDS) {
-    resetYoutubeTask(taskKey);
-    return toast('Verified too early, no reward. Watch the full video and press START again.');
-  }
-
-  try {
-    busy = true;
-    const result = await api('/tasks/submit', { taskKey, token: state.token });
-
-    delete ytState[taskKey];
-    saveYtState();
-
-    toast(result.message || 'Task verified.');
-    await loadAccount();
-  } catch (error) {
-    resetYoutubeTask(taskKey);
-    toast(error.message || 'Verification failed. Press START again.');
-  } finally {
-    busy = false;
-    updateAllAdButtons();
-  }
-}
-
-function askConfirm(message, callback) {
-  if (tg?.showConfirm) tg.showConfirm(message, callback);
-  else callback(window.confirm(message));
-}
-
-async function submitSocialTask(taskKey) {
-  if (busy) return;
-
-  const task = ALL_TASKS.find(t => t.key === taskKey);
-  if (!task) return toast('Task not found.');
-
-  const status = account?.taskStatus?.[taskKey];
-  if (status === 'pending' || status === 'approved') {
-    return toast('Task already submitted or approved.');
-  }
-
-  if (task.url.startsWith('https://t.me') && tg?.openTelegramLink) tg.openTelegramLink(task.url);
-  else if (tg?.openLink) tg.openLink(task.url);
-  else window.open(task.url, '_blank', 'noopener');
-
-  toast('Complete the task, then return here.');
-
-  setTimeout(() => {
-    askConfirm('Have you completed this task? Submit now?', async ok => {
-      if (!ok) return;
-
-      try {
-        busy = true;
-        const result = await api('/tasks/submit', {taskKey});
-        toast(result.message || 'Submitted.');
-        await loadAccount();
-      } catch (error) {
-        toast(error.message);
-      } finally {
-        busy = false;
-        updateAllAdButtons();
-      }
-    });
-  }, 700);
-}
 function getAdsgramController() {
   if (adsgramController) return adsgramController;
 
   if (!window.Adsgram || typeof window.Adsgram.init !== 'function') {
-    throw new Error('AdsGram SDK did not load. Refresh and try again.');
+    throw Error('AdsGram SDK did not load. Reopen the Mini App and try again.');
   }
 
-  adsgramController = window.Adsgram.init({
-    blockId: CONFIG.ADSGRAM_BLOCK_ID
-  });
+  adsgramController = window.Adsgram.init({ blockId: CONFIG.ADSGRAM_BLOCK_ID });
 
   if (!adsgramController || typeof adsgramController.show !== 'function') {
     adsgramController = null;
-    throw new Error('AdsGram could not initialize. Check block ID 52783.');
+    throw Error('AdsGram block could not be initialized. Check block ID 52783.');
   }
 
   return adsgramController;
 }
-let adClickDetected = false;
 
-/* Is the "Go!" click required for this ad slot? */
-function isClickRequired(adId) {
-  if (account?.config?.adClickRequired === false) return false;
-  return !CONFIG.NO_CLICK_ADS.includes(adId);
-}
+async function waitForReward(adId) {
+  for (let i = 0; i < 8; i++) {
+    await new Promise(resolve => setTimeout(resolve, i === 0 ? 1500 : 2000));
 
-/* Detects the AdsGram "Click" tracking request fired when the user taps "Go!". */
-function interceptAdsgramClick() {
-  adClickDetected = false;
+    try {
+      const status = await api('/adsgram/status', { adId });
+      if (status.verified) {
+        await loadAccount();
+        return true;
+      }
+    } catch (_) {}
 
-  const originalFetch = window.fetch;
-  const originalOpen = XMLHttpRequest.prototype.open;
-  const originalBeacon = navigator.sendBeacon ? navigator.sendBeacon.bind(navigator) : null;
-
-  const isClickUrl = url =>
-    typeof url === 'string' && url.includes('adsgram.ai') && url.includes('type=Click');
-
-  window.fetch = function (...args) {
-    const url = typeof args[0] === 'string' ? args[0] : (args[0] && args[0].url) || '';
-    if (isClickUrl(url)) adClickDetected = true;
-    return originalFetch.apply(this, args);
-  };
-
-  XMLHttpRequest.prototype.open = function (method, url, ...rest) {
-    if (isClickUrl(url)) adClickDetected = true;
-    return originalOpen.call(this, method, url, ...rest);
-  };
-
-  if (originalBeacon) {
-    navigator.sendBeacon = function (url, data) {
-      if (isClickUrl(url)) adClickDetected = true;
-      return originalBeacon(url, data);
-    };
+    try {
+      await loadAccount();
+      if (account && Number(account.adsWatched || 0) > lastAdsCount) return true;
+    } catch (_) {}
   }
 
-  return function restore() {
-    window.fetch = originalFetch;
-    XMLHttpRequest.prototype.open = originalOpen;
-    if (originalBeacon) navigator.sendBeacon = originalBeacon;
-  };
+  return false;
 }
-  
+
 async function watchAd(adId) {
   if (busy) return;
-
   if (!Number.isInteger(adId) || adId < 1 || adId > CONFIG.MAX_ADS) {
     return toast('Invalid ad slot.');
   }
 
-  const remaining = getRemainingMs(adId);
-  if (remaining > 0) {
-    updateAdButton(adId);
-    return toast('This ad slot is locked for ' + formatCountdown(remaining) + '.');
-  }
-
   const button = document.getElementById('adBtn' + adId);
-  const statusText = document.getElementById('adStatus' + adId);
 
   try {
-    busy = true;
-    updateAllAdButtons();
-
     if (button) {
       button.disabled = true;
-      button.className = 'task-btn pending';
       button.textContent = 'LOADING';
     }
-    if (statusText) statusText.textContent = 'Preparing advertisement...';
 
     const controller = getAdsgramController();
-
-    toast('Starting advertisement...');
+    lastAdsCount = Number(account?.adsWatched || 0);
 
     const start = await api('/adsgram/start', { adId });
-
     if (start.result?.success === false) {
-      throw new Error(start.result.reason || start.result.error || 'Ad attempt denied.');
-    }
-    if (start.success === false) {
-      throw new Error(start.error || 'Ad attempt denied.');
+      throw Error(start.result.error || 'Ad attempt denied.');
     }
 
-    const clickRequired = isClickRequired(adId);
-
-    /* Watch for the "Go!" click while the ad is on screen (only on click-required slots). */
-    const stopIntercept = clickRequired ? interceptAdsgramClick() : () => {};
-    let adDone = false;
+    busy = true;
+    toast('Loading advertisement…');
 
     try {
-      const shown = await controller.show();
-      /* Resolved = the ad was watched. Skipped/closed ads reject. */
-      adDone = !(shown && shown.done === false);
+      await controller.show();
     } catch (error) {
-      console.warn('AdsGram show error:', error);
-    } finally {
-      stopIntercept();
-    }
-
-    const earned = clickRequired ? adClickDetected : adDone;
-
-    if (!earned) {
-      try { await api('/adsgram/cancel'); } catch (_) {}
-
-      if (clickRequired) {
-        if (statusText) statusText.textContent = 'Tap "Go!" on the ad to earn the reward.';
-        showPopup('Must click inside the ad to interact with it!');
-      } else {
-        if (statusText) statusText.textContent = 'Watch the full ad to earn the reward.';
-        showPopup('Please watch the full ad to receive the reward.');
-      }
+      console.warn('AdsGram ad skipped/failed', error);
+      toast('Ad was not completed. No reward was credited.');
       return;
     }
 
-    toast(clickRequired
-      ? 'Ad clicked. Requesting reward verification...'
-      : 'Ad completed. Requesting reward verification...');
+    toast('Ad completed. Waiting for server verification…');
+    const verified = await waitForReward(adId);
 
-    const claim = await api('/adsgram/claim', { adId, clicked: clickRequired });
-
-    if (claim.success !== true) {
-      throw new Error(claim.error || 'Reward was not credited.');
-    }
-
-    startAdCooldown(adId, Date.now());
-
-    if (statusText) statusText.textContent = 'Completed. Available again in ' + CONFIG.AD_COOLDOWN_HOURS + ' hours.';
-
-    await loadAccount();
-
-    toast('Reward processed. Balance: $' + formatMoney(account?.balance));
+    toast(verified
+      ? 'Reward verified. Balance updated!'
+      : 'Ad completed, but server verification is still pending. Check again shortly.');
   } catch (error) {
-    console.error('AdsGram reward error:', error);
-    if (statusText) statusText.textContent = 'Available status will refresh on retry.';
-    toast(error.message || 'Could not process ad reward.');
+    console.error('watchAd', error);
+    toast(error.message || 'Could not start advertisement.');
   } finally {
     busy = false;
-    updateAllAdButtons();
-
-    if (button && !getRemainingMs(adId)) {
+    if (button) {
       button.disabled = false;
-      button.className = 'task-btn start';
       button.textContent = 'WATCH';
     }
   }
-}
-
-/* Reload account data in the background (used when the Withdraw page opens). */
-async function refreshAccountQuiet() {
-  if (!tg?.initData || busy) return;
-  try { await loadAccount(); } catch (_) {}
-}
-
-function goToEarn(tab) {
-  goTo('earn');
-  switchEarnTab(tab);
-}
-
-/* "Withdrawal requirements" card: shown on the Withdraw page while ads/tasks are incomplete. */
-function renderRequirements() {
-  const card = document.getElementById('reqCard');
-  const list = document.getElementById('reqList');
-  if (!card || !list) return;
-
-  if (!account) {
-    card.classList.add('hidden');
-    return;
-  }
-
-  const reqAds = Number(account.requiredAds || 0);
-  const reqTasks = Number(account.requiredTasks || 0);
-  const ads = Number(account.adsWatched || 0);
-  const tasks = Number(account.tasksCompleted || 0);
-  const adsOk = ads >= reqAds;
-  const tasksOk = tasks >= reqTasks;
-
-  if (adsOk && tasksOk) {
-    card.classList.add('hidden');
-    return;
-  }
-
-  const adsLeft = Math.max(0, reqAds - ads);
-  const tasksLeft = Math.max(0, reqTasks - tasks);
-  const adsShown = Math.min(ads, reqAds);
-  const tasksShown = Math.min(tasks, reqTasks);
-
-  const adsItem = adsOk
-    ? `<div class="req-item done">
-         <div class="req-icon">✅</div>
-         <div class="req-info"><h4>Ads requirement completed</h4><p>${adsShown}/${reqAds} ads in last ${CONFIG.AD_COOLDOWN_HOURS}h</p></div>
-       </div>`
-    : `<div class="req-item">
-         <div class="req-icon">📺</div>
-         <div class="req-info"><h4>Watch ${adsLeft} more ${adsLeft === 1 ? 'ad' : 'ads'}</h4><p>${adsShown}/${reqAds} ads in last ${CONFIG.AD_COOLDOWN_HOURS}h</p></div>
-         <button class="req-btn" onclick="goToEarn('ads')">Watch →</button>
-       </div>`;
-
-  const tasksItem = tasksOk
-    ? `<div class="req-item done">
-         <div class="req-icon">✅</div>
-         <div class="req-info"><h4>Task requirement completed</h4><p>${tasksShown}/${reqTasks} tasks completed</p></div>
-       </div>`
-    : `<div class="req-item">
-         <div class="req-icon">📋</div>
-         <div class="req-info"><h4>Complete ${tasksLeft} more ${tasksLeft === 1 ? 'task' : 'tasks'}</h4><p>${tasksShown}/${reqTasks} tasks completed</p></div>
-         <button class="req-btn" onclick="goToEarn('social')">Complete →</button>
-       </div>`;
-
-  list.innerHTML = adsItem + tasksItem;
-  card.classList.remove('hidden');
 }
 
 function copyReferral() {
@@ -1115,8 +550,8 @@ function copyReferral() {
 
   if (navigator.clipboard?.writeText) {
     navigator.clipboard.writeText(link)
-      .then(()=>toast('Referral link copied!'))
-      .catch(()=>fallbackCopy(link));
+      .then(() => toast('Referral link copied!'))
+      .catch(() => fallbackCopy(link));
   } else {
     fallbackCopy(link);
   }
@@ -1147,8 +582,11 @@ function shareReferral() {
   const url = 'https://t.me/share/url?url=' + encodeURIComponent(link) +
     '&text=' + encodeURIComponent('Join NX USDT!');
 
-  if (tg?.openTelegramLink) tg.openTelegramLink(url);
-  else window.open(url,'_blank','noopener');
+  if (tg?.openTelegramLink) {
+    tg.openTelegramLink(url);
+  } else {
+    window.open(url, '_blank', 'noopener');
+  }
 }
 
 async function requestWithdrawal() {
@@ -1170,44 +608,38 @@ async function requestWithdrawal() {
   }
 
   if (!account.canWithdraw) {
-    renderRequirements();
-    const reqCard = document.getElementById('reqCard');
-    if (reqCard && !reqCard.classList.contains('hidden')) reqCard.scrollIntoView({behavior:'smooth', block:'center'});
-    return toast(`Complete ${account.requiredAds} ads and ${account.requiredTasks} tasks first.`);
+    return toast(`Complete ${account.requiredAds} verified ads and get ${account.requiredTasks} Telegram tasks approved first.`);
   }
 
   try {
     busy = true;
+    const result = await api('/payout', { amount, walletAddress });
 
-    const result = await api('/payout',{amount,walletAddress});
-
-    toast(result.message || 'Withdrawal request submitted. Transfer is not automatic.');
-
+    toast(result.message || 'Withdrawal request submitted. No automatic transfer was made.');
     await loadAccount();
     await loadPayoutHistory();
   } catch (error) {
     toast(error.message);
   } finally {
     busy = false;
-    updateAllAdButtons();
   }
 }
 
 async function loadPayoutHistory() {
-  const container = document.getElementById('payoutHistory');
+  const box = document.getElementById('payoutHistory');
 
   try {
     const result = await api('/payouts');
-    const payouts = result.payouts || [];
+    const rows = result.payouts || [];
 
-    if (!payouts.length) {
-      container.innerHTML = '<p class="small-note">No withdrawals yet.</p>';
+    if (!rows.length) {
+      box.innerHTML = '<p class="small-note">No withdrawals yet.</p>';
       return;
     }
 
-    container.innerHTML = '';
+    box.innerHTML = '';
 
-    payouts.forEach(payout => {
+    rows.forEach(payout => {
       const item = document.createElement('div');
       item.className = 'task';
       item.innerHTML = `
@@ -1217,146 +649,40 @@ async function loadPayoutHistory() {
           <p>${safeText(payout.created_at || '')}</p>
         </div>
         <div class="task-reward">$${formatMoney(payout.amount_usdt)}</div>`;
-      container.appendChild(item);
+      box.appendChild(item);
     });
   } catch (error) {
-    container.innerHTML = `<p class="small-note">${safeText(error.message || 'Could not load payout history.')}</p>`;
+    box.innerHTML = `<p class="small-note">${safeText(error.message || 'Could not load payout history.')}</p>`;
   }
 }
 
-async function loadAccount(path = '/sync') {
-  const result = await api(path, path === '/sync'
-    ? { startParam: tg?.initDataUnsafe?.start_param || '' }
-    : {});
+async function loadAccount() {
+  const result = await api('/sync', {
+    startParam: tg?.initDataUnsafe?.start_param || ''
+  });
 
   account = result;
-  account._loadedAt = Date.now();
-
-  /* The server is the source of truth for ad slot locks. */
-  if (Array.isArray(result.adCooldowns)) {
-    const synced = {};
-    result.adCooldowns.forEach(slot => {
-      if (slot.locked && Number(slot.remainingSeconds) > 0) {
-        synced[slot.adId] = Date.now() + Number(slot.remainingSeconds) * 1000;
-      }
-    });
-    adCooldowns = synced;
-    saveLocalCooldowns();
-  }
 
   document.getElementById('welcome').textContent =
     'Welcome, ' + (result.user?.first_name || 'User') + '!';
 
-  document.getElementById('balance').textContent =
-    formatMoney(result.balance);
-
-  document.getElementById('withdrawBalance').textContent =
-    formatMoney(result.balance);
-
-  saveCachedBalance(result.balance);
-
+  document.getElementById('balance').textContent = formatMoney(result.balance);
+  document.getElementById('withdrawBalance').textContent = formatMoney(result.balance);
   document.getElementById('adsCount').textContent =
     `${result.adsWatched || 0}/${CONFIG.MAX_ADS}`;
-
-  document.getElementById('refCount').textContent =
-    result.referrals || 0;
-
-  document.getElementById('referralCountLarge').textContent =
-    result.referrals || 0;
-
+  document.getElementById('refCount').textContent = result.referrals || 0;
+  document.getElementById('referralCountLarge').textContent = result.referrals || 0;
   document.getElementById('taskCount').textContent =
-    `${Math.min(result.tasksCompleted || 0, result.requiredTasks || 2)}/${result.requiredTasks || 2}`;
-
+    `${result.tasksCompleted || 0}/${result.requiredTasks || 2}`;
   document.getElementById('referralLink').textContent =
     result.referralLink || 'Referral link unavailable';
 
   renderSocialTasks();
-  renderRequirements();
-  updateAllAdButtons();
-}
-
-/* ---------- Automatic refresh: referrals, balance and tasks update by themselves ---------- */
-const AUTO_REFRESH_MS = 20000;
-let autoRefreshTimer = null;
-let autoRefreshRunning = false;
-
-async function autoRefreshAccount() {
-  if (autoRefreshRunning || busy || document.hidden || !tg?.initData || !account) return;
-
-  autoRefreshRunning = true;
-
-  try {
-    await loadAccount('/account');
-  } catch (_) {
-    /* Silent: the next refresh will try again. */
-  } finally {
-    autoRefreshRunning = false;
-  }
-}
-
-/* Instant updates: every few seconds on Home/Refer, ask the server for a tiny summary.
-   If the balance or referral count changed, reload the whole account right away. */
-const QUICK_REFRESH_MS = 3000;
-let quickTimer = null;
-let quickRunning = false;
-
-function currentPage() {
-  const panel = document.querySelector('.panel.active');
-  return panel ? panel.id.replace('Panel', '') : 'home';
-}
-
-async function quickRefresh() {
-  if (quickRunning || busy || document.hidden || !tg?.initData || !account) return;
-
-  const page = currentPage();
-  if (page !== 'home' && page !== 'refer') return;
-
-  quickRunning = true;
-
-  try {
-    const result = await api('/quick');
-
-    const referralsChanged = Number(result.referrals) !== Number(account.referrals || 0);
-    const balanceChanged = Math.abs(Number(result.balance) - Number(account.balance || 0)) > 0.000001;
-
-    if (referralsChanged || balanceChanged) {
-      await loadAccount('/account');
-    }
-  } catch (_) {
-    /* Silent: the next check will try again. */
-  } finally {
-    quickRunning = false;
-  }
-}
-
-function startAutoRefresh() {
-  if (autoRefreshTimer) clearInterval(autoRefreshTimer);
-  if (quickTimer) clearInterval(quickTimer);
-
-  autoRefreshTimer = setInterval(autoRefreshAccount, AUTO_REFRESH_MS);
-  quickTimer = setInterval(quickRefresh, QUICK_REFRESH_MS);
-
-  /* Refresh right away when the user comes back to the app. */
-  document.addEventListener('visibilitychange', () => {
-    if (!document.hidden) {
-      autoRefreshAccount();
-      quickRefresh();
-    }
-  });
-
-  try { tg?.onEvent?.('activated', autoRefreshAccount); } catch (_) {}
 }
 
 async function initialize() {
-  setCooldownStorageKey();
-  loadCachedBalance();
-  loadYtState();
-  loadTgState();
-  loadLocalCooldowns();
   renderAds();
   renderSocialTasks();
-  startCooldownTicker();
-  startAutoRefresh();
 
   if (!tg?.initData) {
     document.getElementById('welcome').textContent =
@@ -1368,7 +694,7 @@ async function initialize() {
   try {
     await loadAccount();
   } catch (error) {
-    console.error('Account load failed:',error);
+    console.error('Account load failed:', error);
     document.getElementById('welcome').textContent =
       'Could not load account. Reopen the Mini App.';
     toast(error.message || 'Could not load account.');
