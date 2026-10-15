@@ -1294,14 +1294,54 @@ async function autoRefreshAccount() {
   }
 }
 
+/* Instant updates: every few seconds on Home/Refer, ask the server for a tiny summary.
+   If the balance or referral count changed, reload the whole account right away. */
+const QUICK_REFRESH_MS = 3000;
+let quickTimer = null;
+let quickRunning = false;
+
+function currentPage() {
+  const panel = document.querySelector('.panel.active');
+  return panel ? panel.id.replace('Panel', '') : 'home';
+}
+
+async function quickRefresh() {
+  if (quickRunning || busy || document.hidden || !tg?.initData || !account) return;
+
+  const page = currentPage();
+  if (page !== 'home' && page !== 'refer') return;
+
+  quickRunning = true;
+
+  try {
+    const result = await api('/quick');
+
+    const referralsChanged = Number(result.referrals) !== Number(account.referrals || 0);
+    const balanceChanged = Math.abs(Number(result.balance) - Number(account.balance || 0)) > 0.000001;
+
+    if (referralsChanged || balanceChanged) {
+      await loadAccount('/account');
+    }
+  } catch (_) {
+    /* Silent: the next check will try again. */
+  } finally {
+    quickRunning = false;
+  }
+}
+
 function startAutoRefresh() {
   if (autoRefreshTimer) clearInterval(autoRefreshTimer);
+  if (quickTimer) clearInterval(quickTimer);
 
   autoRefreshTimer = setInterval(autoRefreshAccount, AUTO_REFRESH_MS);
+  quickTimer = setInterval(quickRefresh, QUICK_REFRESH_MS);
 
   /* Refresh right away when the user comes back to the app. */
   document.addEventListener('visibilitychange', () => {
-    if (!document.hidden) autoRefreshAccount();
+    if (!document.hidden) {
+      autoRefreshAccount();
+      quickRefresh();
+    }
   });
 
   try { tg?.onEvent?.('activated', autoRefreshAccount); } catch (_) {}
