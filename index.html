@@ -1354,6 +1354,20 @@ function startAutoRefresh() {
   try { tg?.onEvent?.('activated', autoRefreshAccount); } catch (_) {}
 }
 
+/* Asks once for permission so the bot can message the user (for example the referral bonus message). */
+function askWriteAccess() {
+  try {
+    if (!tg?.requestWriteAccess) return;
+    if (tg.initDataUnsafe?.user?.allows_write_to_pm) return;
+
+    const key = 'nxusdt_write_access_asked_v1_' + (tg.initDataUnsafe?.user?.id || 'telegram');
+    if (localStorage.getItem(key)) return;
+    localStorage.setItem(key, '1');
+
+    tg.requestWriteAccess(() => {});
+  } catch (_) {}
+}
+
 async function initialize() {
   setCooldownStorageKey();
   loadCachedBalance();
@@ -1374,6 +1388,7 @@ async function initialize() {
 
   try {
     await loadAccount();
+    askWriteAccess();
   } catch (error) {
     console.error('Account load failed:',error);
     document.getElementById('welcome').textContent =
