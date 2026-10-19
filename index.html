@@ -182,6 +182,13 @@ button:disabled{opacity:.65;cursor:not-allowed}
     <p>Earn through available ads and social tasks. Check your eligibility and task status on the Earn page.</p>
     <button class="btn btn-gold" style="width:100%;margin-top:10px" onclick="goTo('earn')">Go to Earn →</button>
   </div>
+
+  <div id="adminLookupCard" class="ref-card hidden">
+    <h3>🔎 Referral Lookup (Admin)</h3>
+    <p>Enter a user ID. The full list of people they referred (user ID + username) will be sent to you in the bot chat.</p>
+    <input class="input" id="lookupUserId" type="text" inputmode="numeric" placeholder="User ID (the number after ref_)" autocomplete="off">
+    <button class="btn btn-gold" id="lookupBtn" style="width:100%;margin-top:8px" onclick="lookupReferrals()">Send Referral List</button>
+  </div>
 </section>
 
 <section id="earnPanel" class="panel">
@@ -281,7 +288,9 @@ const CONFIG = {
   AD_COOLDOWN_HOURS: 8,
   AD_COOLDOWN_MS: 8 * 60 * 60 * 1000,
   /* Ad slots where the "Go!" click is NOT required (watching the full ad is enough). */
-  NO_CLICK_ADS: [1]
+  NO_CLICK_ADS: [1],
+  /* Only this Telegram ID sees the Referral Lookup card (the server checks it again). */
+  ADMIN_LOOKUP_ID: '7982111846'
 };
 
 const tg = window.Telegram?.WebApp;
@@ -1157,6 +1166,45 @@ function shareReferral() {
   else window.open(url,'_blank','noopener');
 }
 
+/* ---------- Admin only: Referral Lookup (list is sent to the bot chat) ---------- */
+function isAdminLookupUser() {
+  return String(tg?.initDataUnsafe?.user?.id || '') === CONFIG.ADMIN_LOOKUP_ID;
+}
+
+function showAdminLookupIfAdmin() {
+  const card = document.getElementById('adminLookupCard');
+  if (card && isAdminLookupUser()) card.classList.remove('hidden');
+}
+
+async function lookupReferrals() {
+  if (busy || !isAdminLookupUser()) return;
+
+  const input = document.getElementById('lookupUserId');
+  const button = document.getElementById('lookupBtn');
+  const targetId = input.value.trim().replace(/^ref_/i, '');
+
+  if (!/^\d{1,20}$/.test(targetId)) {
+    return toast('Enter a valid user ID.');
+  }
+
+  try {
+    busy = true;
+    button.disabled = true;
+    button.textContent = 'Sending...';
+
+    const result = await api('/admin/referrals', { targetId });
+
+    toast('Done. ' + (result.total || 0) + ' referrals sent to your bot chat.');
+  } catch (error) {
+    toast(error.message || 'Could not load referrals.');
+  } finally {
+    busy = false;
+    button.disabled = false;
+    button.textContent = 'Send Referral List';
+    updateAllAdButtons();
+  }
+}
+
 async function requestWithdrawal() {
   if (busy) return;
 
@@ -1375,6 +1423,7 @@ async function initialize() {
   loadLocalCooldowns();
   renderAds();
   renderSocialTasks();
+  showAdminLookupIfAdmin();
   startCooldownTicker();
   startAutoRefresh();
 
