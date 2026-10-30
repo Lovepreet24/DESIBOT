@@ -564,7 +564,8 @@ function renderAds() {
 
 const SOCIAL_TASKS = [
   {key:'telegram_earn',title:'Join NX USDT Channel',description:'Join the official earning channel.',icon:'📢',url:CONFIG.MAIN_CHANNEL},
-  {key:'telegram_payout',title:'Join Payout Channel',description:'Receive payout announcements.',icon:'💸',url:CONFIG.PAYOUT_CHANNEL}
+  {key:'telegram_payout',title:'Join Payout Channel',description:'Receive payout announcements.',icon:'💸',url:CONFIG.PAYOUT_CHANNEL},
+  {key:'x_follow',title:'Follow on X',description:'Follow our official X account, then come back and press VERIFY.',icon:'🐦',url:'https://x.com/Airdrop_Search1'}
 ];
 
 const YOUTUBE_TASKS = [
@@ -694,7 +695,7 @@ function startTelegramTask(taskKey) {
   saveTgState();
   renderTelegramTasks();
 
-  toast('Join the channel, then come back and press VERIFY.');
+  toast('Complete the task, then come back and press VERIFY.');
 }
 
 async function verifyTelegramTask(taskKey) {
